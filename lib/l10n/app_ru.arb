@@ -1,0 +1,20 @@
+{
+"@@locale": "ru",
+"cmnOk": "OK",
+"cmnYes": "Да",
+"cmnNo": "Нет",
+"homeGameTitle": "Камера глаз",
+"homeStartButton": "Начинать",
+"homeNoRecords": "Давайте будем вести рекорд",
+"homeLockedLevel": "Очистить предыдущий уровень",
+"memorizeGuide": "Помните положение иллюстрации",
+"memorizeHide": "Скрывать",
+"memorizeDone": "Помните",
+"answerGuide": "Выберите ответ",
+"answerConfirm": "Вы сдаетесь?",
+"answerChoice": "Отвечать",
+"resultGameClear": "Полный!",
+"resultGameFailure": "Неуспешный...",
+"resultBackHome": "Вернуться на домашний экран",
+"resultComment": "Ты гений"
+}

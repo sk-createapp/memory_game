@@ -1,0 +1,20 @@
+{
+"@@locale": "ko",
+"cmnOk": "OK",
+"cmnYes": "예",
+"cmnNo": "아니요",
+"homeGameTitle": "카메라 눈",
+"homeStartButton": "시작",
+"homeNoRecords": "기록을 유지합시다",
+"homeLockedLevel": "이전 레벨을 지우십시오",
+"memorizeGuide": "그림의 위치를 ​​기억하십시오",
+"memorizeHide": "숨다",
+"memorizeDone": "기억합니다",
+"answerGuide": "답을 선택하십시오",
+"answerConfirm": "포기합니까?",
+"answerChoice": "답변",
+"resultGameClear": "완벽한!",
+"resultGameFailure": "실패한...",
+"resultBackHome": "홈 화면으로 돌아갑니다",
+"resultComment": "당신은 천재입니다"
+}

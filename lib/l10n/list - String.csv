@@ -1,0 +1,19 @@
+カテゴリ,Key,日本語,英語,中国語,韓国語,ヒンドゥー後,ロシア語,フランス語,ドイツ語,スペイン語
+,@@locale,ja,en,zh,ko,hi,ru,fr,de,es
+共通,cmnOk,OK,OK,OK,OK,OK,OK,OK,OK,OK
+,cmnYes,はい,Yes,是的,예,हाँ,Да,Oui,Ja,Sí
+,cmnNo,いいえ,No,不,아니요,नहीं,Нет,Non,NEIN,No
+ホーム画面,homeGameTitle,写真記憶,Camera Eye,相机的眼睛,카메라 눈,कैमरा आई,Камера глаз,Œil de caméra,Kameraauge,Ojo de cámara
+,homeStartButton,スタート,Start,开始,시작,शुरू,Начинать,Commencer,Start,Comenzar
+,homeNoRecords,記録を残そう,Let's keep a record,让我们保留记录,기록을 유지합시다,आइए एक रिकॉर्ड रखें,Давайте будем вести рекорд,Gardons un record,Lassen Sie uns einen Rekord behalten,Mantengamos un récord
+,homeLockedLevel,前のレベルをクリアしてね,Clear the previous level,清除上一个级别,이전 레벨을 지우십시오,पिछले स्तर को साफ़ करें,Очистить предыдущий уровень,Effacer le niveau précédent,Löschen Sie die vorherige Ebene,Borrar el nivel anterior
+記憶画面,memorizeGuide,イラストの位置を覚えてね,Remember the position of the illustration,记住插图的位置,그림의 위치를 ​​기억하십시오,चित्रण की स्थिति को याद रखें,Помните положение иллюстрации,Rappelez-vous la position de l'illustration,Erinnern Sie sich an die Position der Illustration,Recuerda la posición de la ilustración
+,memorizeHide,隠す,Hide,隐藏,숨다,छिपाना,Скрывать,Cacher,Verstecken,Esconder
+,memorizeDone,覚えた,Rememberd,记住,기억합니다,याद रखना,Помните,Se souvenir,Erinnere dich,Recordar
+回答画面,answerGuide,答えを選んでね,Choose the answer,选择答案,답을 선택하십시오,जवाब का चयन करें,Выберите ответ,Choisissez la réponse,Wähle die Antwort,Elija la respuesta
+,answerConfirm,あきらめる？,Do you give up?,你放弃吗？,포기합니까?,क्या तुम छोड़ दोगे?,Вы сдаетесь?,Est-ce que tu abandonnes?,Gibst du auf?,¿Te rindes?
+,answerChoice,答え,Answer,回答,답변,उत्तर,Отвечать,Répondre,Antwort,Respuesta
+結果画面,resultGameClear,クリア！,Complete!,完全的！,완벽한!,पूरा!,Полный!,Complet!,Vollständig!,¡Completo!
+,resultGameFailure,残念でした...,Failed...,失败的...,실패한...,असफल...,Неуспешный...,Échoué...,Fehlgeschlagen...,Fallido...
+,resultBackHome,ホーム画面に戻る,Return to the home screen,返回主屏幕,홈 화면으로 돌아갑니다,होम स्क्रीन पर लौटें,Вернуться на домашний экран,Retour à l'écran d'accueil,Kehren Sie zum Startbildschirm zurück,Volver a la pantalla de inicio
+,resultComment,きみは天才,You're a genius,你是个天才,당신은 천재입니다,आप जीनियस हैं,Ты гений,Tu es un génie,Du bist ein Genie,Eres un genio

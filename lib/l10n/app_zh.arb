@@ -1,0 +1,20 @@
+{
+"@@locale": "zh",
+"cmnOk": "OK",
+"cmnYes": "是的",
+"cmnNo": "不",
+"homeGameTitle": "相机的眼睛",
+"homeStartButton": "开始",
+"homeNoRecords": "让我们保留记录",
+"homeLockedLevel": "清除上一个级别",
+"memorizeGuide": "记住插图的位置",
+"memorizeHide": "隐藏",
+"memorizeDone": "记住",
+"answerGuide": "选择答案",
+"answerConfirm": "你放弃吗？",
+"answerChoice": "回答",
+"resultGameClear": "完全的！",
+"resultGameFailure": "失败的...",
+"resultBackHome": "返回主屏幕",
+"resultComment": "你是个天才"
+}

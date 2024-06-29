@@ -1,0 +1,20 @@
+{
+"@@locale": "ja",
+"cmnOk": "OK",
+"cmnYes": "はい",
+"cmnNo": "いいえ",
+"homeGameTitle": "写真記憶",
+"homeStartButton": "スタート",
+"homeNoRecords": "記録を残そう",
+"homeLockedLevel": "前のレベルをクリアしてね",
+"memorizeGuide": "イラストの位置を覚えてね",
+"memorizeHide": "隠す",
+"memorizeDone": "覚えた",
+"answerGuide": "答えを選んでね",
+"answerConfirm": "あきらめる？",
+"answerChoice": "答え",
+"resultGameClear": "クリア！",
+"resultGameFailure": "残念でした...",
+"resultBackHome": "ホーム画面に戻る",
+"resultComment": "きみは天才"
+}

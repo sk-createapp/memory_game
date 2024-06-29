@@ -1,0 +1,20 @@
+{
+"@@locale": "fr",
+"cmnOk": "OK",
+"cmnYes": "Oui",
+"cmnNo": "Non",
+"homeGameTitle": "Œil de caméra",
+"homeStartButton": "Commencer",
+"homeNoRecords": "Gardons un record",
+"homeLockedLevel": "Effacer le niveau précédent",
+"memorizeGuide": "Rappelez-vous la position de l'illustration",
+"memorizeHide": "Cacher",
+"memorizeDone": "Se souvenir",
+"answerGuide": "Choisissez la réponse",
+"answerConfirm": "Est-ce que tu abandonnes?",
+"answerChoice": "Répondre",
+"resultGameClear": "Complet!",
+"resultGameFailure": "Échoué...",
+"resultBackHome": "Retour à l'écran d'accueil",
+"resultComment": "Tu es un génie"
+}

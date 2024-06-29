@@ -1,0 +1,20 @@
+{
+"@@locale": "hi",
+"cmnOk": "OK",
+"cmnYes": "हाँ",
+"cmnNo": "नहीं",
+"homeGameTitle": "कैमरा आई",
+"homeStartButton": "शुरू",
+"homeNoRecords": "आइए एक रिकॉर्ड रखें",
+"homeLockedLevel": "पिछले स्तर को साफ़ करें",
+"memorizeGuide": "चित्रण की स्थिति को याद रखें",
+"memorizeHide": "छिपाना",
+"memorizeDone": "याद रखना",
+"answerGuide": "जवाब का चयन करें",
+"answerConfirm": "क्या तुम छोड़ दोगे?",
+"answerChoice": "उत्तर",
+"resultGameClear": "पूरा!",
+"resultGameFailure": "असफल...",
+"resultBackHome": "होम स्क्रीन पर लौटें",
+"resultComment": "आप जीनियस हैं"
+}

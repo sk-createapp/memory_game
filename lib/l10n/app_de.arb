@@ -1,0 +1,20 @@
+{
+"@@locale": "de",
+"cmnOk": "OK",
+"cmnYes": "Ja",
+"cmnNo": "NEIN",
+"homeGameTitle": "Kameraauge",
+"homeStartButton": "Start",
+"homeNoRecords": "Lassen Sie uns einen Rekord behalten",
+"homeLockedLevel": "Löschen Sie die vorherige Ebene",
+"memorizeGuide": "Erinnern Sie sich an die Position der Illustration",
+"memorizeHide": "Verstecken",
+"memorizeDone": "Erinnere dich",
+"answerGuide": "Wähle die Antwort",
+"answerConfirm": "Gibst du auf?",
+"answerChoice": "Antwort",
+"resultGameClear": "Vollständig!",
+"resultGameFailure": "Fehlgeschlagen...",
+"resultBackHome": "Kehren Sie zum Startbildschirm zurück",
+"resultComment": "Du bist ein Genie"
+}

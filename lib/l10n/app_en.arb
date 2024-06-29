@@ -1,0 +1,20 @@
+{
+"@@locale": "en",
+"cmnOk": "OK",
+"cmnYes": "Yes",
+"cmnNo": "No",
+"homeGameTitle": "Camera Eye",
+"homeStartButton": "Start",
+"homeNoRecords": "Let's keep a record",
+"homeLockedLevel": "Clear the previous level",
+"memorizeGuide": "Remember the position of the illustration",
+"memorizeHide": "Hide",
+"memorizeDone": "Rememberd",
+"answerGuide": "Choose the answer",
+"answerConfirm": "Do you give up?",
+"answerChoice": "Answer",
+"resultGameClear": "Complete!",
+"resultGameFailure": "Failed...",
+"resultBackHome": "Return to the home screen",
+"resultComment": "You're a genius"
+}

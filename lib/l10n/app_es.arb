@@ -1,0 +1,20 @@
+{
+"@@locale": "es",
+"cmnOk": "OK",
+"cmnYes": "Sí",
+"cmnNo": "No",
+"homeGameTitle": "Ojo de cámara",
+"homeStartButton": "Comenzar",
+"homeNoRecords": "Mantengamos un récord",
+"homeLockedLevel": "Borrar el nivel anterior",
+"memorizeGuide": "Recuerda la posición de la ilustración",
+"memorizeHide": "Esconder",
+"memorizeDone": "Recordar",
+"answerGuide": "Elija la respuesta",
+"answerConfirm": "¿Te rindes?",
+"answerChoice": "Respuesta",
+"resultGameClear": "¡Completo!",
+"resultGameFailure": "Fallido...",
+"resultBackHome": "Volver a la pantalla de inicio",
+"resultComment": "Eres un genio"
+}
