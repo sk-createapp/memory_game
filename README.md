@@ -1,16 +1,89 @@
-# memory_game
+# 写真記憶 -記憶力トレーニングアプリ
 
-A new Flutter project.
+目で見たものを写真のように記憶する力をトレーニングするアプリ。
 
-## Getting Started
+あなたも天才的な記憶力を手に入れませんか？
 
-This project is a starting point for a Flutter application.
+# デモ
 
-A few resources to get you started if this is your first Flutter project:
+[デモ動画](https://drive.google.com/file/d/1zehrxW1JasQIGNGl-_1EJAzcuSPsD8OV/view?usp=sharing)
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+# 概要
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+目で見たものを写真のように記憶する…
+
+写真記憶や映像記憶、カメラアイなどと呼ばれる天才的な能力。そんな能力を後天的に身につけられるかもしれない記憶力トレーニングアプリです。
+
+ネットによると、カメラアイは、目で見たものをひたすら正確に思い出す訓練をすると、後天的に身につけられるかもしれないという雰囲気でした。
+
+そこで、見たものをそのまま記憶して思い出すトレーニングに特化したアプリを開発しました。
+
+記憶力を楽しく鍛えられ、脳トレやボケ防止にも役立つゲームです。
+
+# 使い方
+
+1. レベルを選択：ホーム画面で、トレーニングしたいレベルを選びます。レベルはスライダーから選択できます。
+3. ゲームを開始：ホーム画面の[Start]ボタンを押してゲームを開始します。記憶画面に表示された画像と位置を覚えます。
+4. 回答：記憶画面で[OK]ボタンを押して回答します。[？]の位置に表示されていた画像を、答えの中から選びます。
+6. 結果の確認：回答画面で[OK]ボタンを押して結果を確認します。ホーム画面に戻ると、クリアしたレベルのベストタイムが表示されます。ホーム画面の背景画像はクリアした最高レベルに応じて変わります。
+
+# フレームワーク・パッケージ
+
+* flutter
+* flutter_riverpod
+* shared_preferences
+* admob_flutter
+* flutter_launcher_icons
+
+# 設計の概要
+
+本アプリはMVVMアーキテクチャで作成しました。主なソースコードの説明は以下の通りです。
+
+/lib
+
+|-- /model: モデルを定義するフォルダ。
+
+|　|-- /game_info.dart: アプリバージョン・クリア回数など、アプリ全体にかかわる情報のモデル。Shared Preferencesとのやり取りも担う。
+
+|　|-- /item_table_info.dart: 記憶用の画像テーブルを管理するモデル。
+
+|　|-- /level_infos.dart: 各レベルごとの記録を管理するモデル。Shared Preferencesとのやり取りも担う。
+
+|
+
+|-- /state: ビューモデルを定義するフォルダ。
+
+|　|-- /app_info_state.dart: その他のステートを管理。
+
+|　|-- /game_info_state.dart: game_infoのステート管理。
+
+|　|-- /item_table_info_state.dart: item_table_infoのステート管理。
+
+|　|-- /level_infos_state.dart: level_infosのステート管理。
+
+|
+
+|-- /view: ビューを定義するフォルダ。
+
+|　|-- /answer.dart: 回答画面。
+
+|　|-- /home.dart: ホーム画面。
+
+|　|-- /momorize.dart: 記憶画面。
+
+|　|-- /menu.dart: メニュー画面。（現状非使用）
+
+|　|-- /result.dart: 結果表示画面。
+
+|
+
+|-- main.dart: home.dartを呼び出す。
+
+# 現状の課題
+
+* StatefulWidget内で管理しているステートをProviderで管理すること。
+  * home_view以外はStateFulWidgetで作成しており、クラス内で持つステートで状態管理している。それによりコードが複雑になり可読性が悪化している箇所がある。Providerで管理し、ステート更新に関するロジックを切り分けることで可読性・メンテナンス性を向上させたい。 
+* テストコードを作成すること。
+  * 本来であれば、テストドリブンで実装することが理想。
+* ウィジェットやスタイルの共通化。
+  * まだまだ共通化できるところはあるので、共通化により可読性・メンテナンス性を向上させたい。
