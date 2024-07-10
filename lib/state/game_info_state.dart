@@ -25,7 +25,7 @@ class GameInfoNotifier extends StateNotifier<GameInfo> {
   }
 
   Future<void> _loadGameInfo() async {
-    state = await GameInfo.getGameInfo();
+    state = await GameInfo.getGameInfo() ?? state;
   }
 
   Future<void> _saveGameInfo() async {

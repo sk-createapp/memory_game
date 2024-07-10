@@ -20,15 +20,17 @@ class LevelInfoNotifier extends StateNotifier<List<LevelInfo>> {
   }
 
   Future<void> _loadLevelInfos() async {
-    List<LevelInfo> ret = (await LevelInfo.getLevelInfos()).cast<LevelInfo>();
-    state = ret.isEmpty ? state : ret;
+    List? levelInfos = (await LevelInfo.getLevelInfos());
+    if (levelInfos != null) {
+      state = List.of(levelInfos.cast<LevelInfo>().map((e) => e.copy()));
+    }
   }
 
   Future<void> _saveLevelInfos() async {
     await LevelInfo.saveLevelInfos(state);
   }
 
-  // レコードの追加
+  //レコードの追加
   void addRecord(int levelIndex, RecordInfo recordInfo) {
     state[levelIndex].recordInfos.add(recordInfo);
 
@@ -47,7 +49,7 @@ class LevelInfoNotifier extends StateNotifier<List<LevelInfo>> {
       state[levelIndex + 1].isLocked = false;
     }
 
-    state = List.from(state);
+    state = List.of(state);
 
     //SP保存
     _saveLevelInfos();

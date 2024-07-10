@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:memory_game/constant/num_constant.dart';
 import 'package:memory_game/constant/sp_key.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -88,14 +89,18 @@ class LevelInfo {
   }
 
   // SP取得
-  static Future<List> getLevelInfos() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String? json = prefs.getString(SpKey.levelInfos.name);
-    if (json == null) {
-      return Future<List<LevelInfo>>.value([]);
-    } else {
-      return Future<List>.value(
-          jsonDecode(json).map((e) => LevelInfo.fromJson(e)).toList());
+  static Future<List?> getLevelInfos() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final String? json = prefs.getString(SpKey.levelInfos.name);
+      if (json == null) {
+        return null;
+      } else {
+        return Future<List>.value(
+            jsonDecode(json).map((e) => LevelInfo.fromJson(e)).toList());
+      }
+    } catch (e) {
+      return null;
     }
   }
 }

@@ -45,14 +45,17 @@ class GameInfo {
   }
 
   // SP取得
-  static Future<GameInfo> getGameInfo() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String? json = prefs.getString(SpKey.gameInfo.name);
-    if (json == null) {
-      return Future<GameInfo>.value(
-          GameInfo(appVersion: DefNum.appVersion, clearNum: 0));
-    } else {
-      return Future<GameInfo>.value(GameInfo.fromJson(jsonDecode(json)));
+  static Future<GameInfo?> getGameInfo() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final String? json = prefs.getString(SpKey.gameInfo.name);
+      if (json == null) {
+        return null;
+      } else {
+        return Future<GameInfo>.value(GameInfo.fromJson(jsonDecode(json)));
+      }
+    } catch (e) {
+      return null;
     }
   }
 }
