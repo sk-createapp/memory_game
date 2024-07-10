@@ -11,13 +11,17 @@ final levelInfosProvider =
 class LevelInfoNotifier extends StateNotifier<List<LevelInfo>> {
   LevelInfoNotifier()
       : super([
-          for (int i = 0; i < DefNum.maxLevel; i++) LevelInfo(recordInfos: [])
+          for (int i = 0; i < DefNum.maxLevel; i++)
+            LevelInfo(
+                recordInfos: [],
+                isLocked: (i >= DefNum.defaultLockedLevel) ? true : false)
         ]) {
     _loadLevelInfos();
   }
 
   Future<void> _loadLevelInfos() async {
-    state = (await LevelInfo.getLevelInfos()).cast<LevelInfo>();
+    List<LevelInfo> ret = (await LevelInfo.getLevelInfos()).cast<LevelInfo>();
+    state = ret.isEmpty ? state : ret;
   }
 
   Future<void> _saveLevelInfos() async {
