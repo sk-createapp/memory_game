@@ -30,7 +30,7 @@ class MyTextButton extends StatelessWidget {
       height: context.widthByRatio(heightRatio),
       child: TextButton(
         style: ButtonStyle(
-          backgroundColor: MaterialStateProperty.all(backColor),
+          backgroundColor: WidgetStateProperty.all(backColor),
           splashFactory: NoSplash.splashFactory,
         ),
         onPressed: () {

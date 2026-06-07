@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:memory_game/constant/image_path.dart';
 import 'package:memory_game/constant/num_constant.dart';
 import 'package:memory_game/model/item_table_info.dart';

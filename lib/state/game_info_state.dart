@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:memory_game/constant/num_constant.dart';
 import 'package:memory_game/constant/sp_key.dart';
 import 'package:memory_game/model/game_info.dart';

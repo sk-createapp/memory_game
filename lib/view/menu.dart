@@ -1,4 +1,3 @@
-import 'package:admob_flutter/admob_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memory_game/constant/color_constant.dart';
@@ -45,10 +44,7 @@ class _MemorizeViewState extends ConsumerState<MenuView> {
                       flex: 1,
                     ),
                     //バナー
-                    AdmobBanner(
-                      adUnitId: AdMobService().getBannerAdUnitId(),
-                      adSize: AdmobBannerSize.BANNER,
-                    ),
+                    const AdmobBannerWidget(),
                   ],
                 ),
               ),

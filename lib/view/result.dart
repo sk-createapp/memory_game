@@ -1,6 +1,5 @@
-import 'package:admob_flutter/admob_flutter.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:memory_game/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memory_game/constant/color_constant.dart';
 import 'package:memory_game/constant/image_path.dart';
@@ -25,8 +24,8 @@ class _AnswerViewState extends ConsumerState<ResultView> {
     final itemTableInfo = ref.watch(itemTableInfoProvider);
     final gameLevel = ref.watch(gameLevelProvider);
 
-    return WillPopScope(
-      onWillPop: () async => false,
+    return PopScope(
+      canPop: false,
       child: Scaffold(
         backgroundColor: DefColor.lightBeige,
         body: SafeArea(
@@ -130,10 +129,7 @@ class _AnswerViewState extends ConsumerState<ResultView> {
                         flex: 1,
                       ),
                       //バナー
-                      AdmobBanner(
-                        adUnitId: AdMobService().getBannerAdUnitId(),
-                        adSize: AdmobBannerSize.BANNER,
-                      ),
+                      const AdmobBannerWidget(),
                     ],
                   ),
                 ),

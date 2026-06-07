@@ -1,7 +1,6 @@
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:memory_game/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memory_game/constant/color_constant.dart';
 import 'package:memory_game/constant/num_constant.dart';
@@ -43,8 +42,8 @@ class _AnswerViewState extends ConsumerState<AnswerView> {
     //回答アイテムに関するクラス内変数の設定
     setAnswerItemIndex(itemTableInfo);
 
-    return WillPopScope(
-      onWillPop: () async => false,
+    return PopScope(
+      canPop: false,
       child: Scaffold(
         backgroundColor: DefColor.lightBeige,
         body: SafeArea(

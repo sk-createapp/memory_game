@@ -7,7 +7,7 @@ void main() async {
   const outputFilePath = "./lib/l10n/";
   // CSVファイルの読み込み
   final inputContent = await File(inputFile).readAsString();
-  final csvList = const CsvToListConverter().convert(inputContent);
+  final csvList = csv.decode(inputContent);
   const langStartColumn = 2;
   const keyColumn = 1;
   const langIDRow = 1;

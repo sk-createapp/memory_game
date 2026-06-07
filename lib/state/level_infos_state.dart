@@ -1,4 +1,4 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:memory_game/constant/num_constant.dart';
 import 'package:memory_game/model/level_infos.dart';
 

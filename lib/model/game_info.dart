@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:memory_game/constant/num_constant.dart';
 import 'package:memory_game/constant/sp_key.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
