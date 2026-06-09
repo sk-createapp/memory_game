@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:memory_game/constant/color_constant.dart';
 import 'package:memory_game/constant/num_constant.dart';
+import 'package:memory_game/model/item_table_info.dart';
 import 'package:memory_game/view/util/extension.dart';
 
-import '../../../model/item_table_info.dart';
+typedef AnswerTablePressed = void Function(int index, int ansIndex);
 
 //テキストボタン
 class MyTextButton extends StatelessWidget {
   final String text;
-  final Function onPressed;
+  final VoidCallback onPressed;
   final Color textColor;
   final Color backColor;
   final double widthRatio;
@@ -33,9 +34,7 @@ class MyTextButton extends StatelessWidget {
           backgroundColor: WidgetStateProperty.all(backColor),
           splashFactory: NoSplash.splashFactory,
         ),
-        onPressed: () {
-          onPressed();
-        },
+        onPressed: onPressed,
         child: SizedBox(
           width: context.widthByRatio(widthRatio * 0.8),
           height: context.widthByRatio(heightRatio),
@@ -58,7 +57,7 @@ class MyTextButton extends StatelessWidget {
 //〇ボタン
 class MyCircleButton extends StatelessWidget {
   final Widget child;
-  final Function onPressed;
+  final VoidCallback onPressed;
   final Color backColor;
   final double ratio;
   const MyCircleButton(
@@ -79,9 +78,7 @@ class MyCircleButton extends StatelessWidget {
         splashFactory: NoSplash.splashFactory,
         shape: const CircleBorder(),
       ),
-      onPressed: () {
-        onPressed();
-      },
+      onPressed: onPressed,
       child: child,
     );
   }
@@ -120,15 +117,12 @@ class MemorizeTable extends StatelessWidget {
   }
 }
 
-//回答テーブル
-var _answerItemKeys = [];
-
 class AnswerTable extends StatefulWidget {
   final int rowNum;
   final List<TableItem> tableItems;
   final int? selectedIndex;
-  final Function(int index, int ansIndex) onPressed;
-  final Function(List<double>)? getItemHeights;
+  final AnswerTablePressed onPressed;
+  final ValueChanged<List<double>>? getItemHeights;
 
   const AnswerTable({
     super.key,
@@ -144,11 +138,28 @@ class AnswerTable extends StatefulWidget {
 }
 
 class _AnswerTableState extends State<AnswerTable> {
+  late List<GlobalKey> _answerItemKeys;
+
   @override
   void initState() {
-    _answerItemKeys.clear();
-    _answerItemKeys = [for (int i = 0; i < DefNum.answerNum; i++) GlobalKey()];
     super.initState();
+    _answerItemKeys = _createAnswerItemKeys();
+  }
+
+  @override
+  void didUpdateWidget(covariant AnswerTable oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final answerItemNum =
+        widget.tableItems.where((item) => item.isAnswerItem).length;
+    if (_answerItemKeys.length != answerItemNum) {
+      _answerItemKeys = _createAnswerItemKeys();
+    }
+  }
+
+  List<GlobalKey> _createAnswerItemKeys() {
+    final answerItemNum =
+        widget.tableItems.where((item) => item.isAnswerItem).length;
+    return [for (int i = 0; i < answerItemNum; i++) GlobalKey()];
   }
 
   @override
@@ -168,7 +179,7 @@ class _AnswerTableState extends State<AnswerTable> {
         if (element.currentContext == null) {
           continue;
         }
-        RenderBox box = element.currentContext!.findRenderObject() as RenderBox;
+        final box = element.currentContext!.findRenderObject() as RenderBox;
         results.add(box.localToGlobal(Offset.zero).dy + box.size.height);
       }
 
@@ -357,7 +368,7 @@ class _CorrectAnswerTableState extends State<CorrectAnswerTable> {
 }
 
 //アイテム非表示状態のテーブル
-class HiddenTable extends StatefulWidget {
+class HiddenTable extends StatelessWidget {
   final int rowNum;
   final List<TableItem> tableItems;
   const HiddenTable({
@@ -367,16 +378,11 @@ class HiddenTable extends StatefulWidget {
   });
 
   @override
-  State<HiddenTable> createState() => _HiddenTableState();
-}
-
-class _HiddenTableState extends State<HiddenTable> {
-  @override
   Widget build(BuildContext context) {
     List<Widget> widgets = [];
 
-    for (int i = 0; i < widget.tableItems.length; i++) {
-      if (widget.tableItems[i].isShowItem) {
+    for (int i = 0; i < tableItems.length; i++) {
+      if (tableItems[i].isShowItem) {
         //回答対象のアイテムでない場合
         widgets.add(AspectRatio(
           aspectRatio: 1,
@@ -396,7 +402,7 @@ class _HiddenTableState extends State<HiddenTable> {
       aspectRatio: 1,
       child: GridView.count(
         childAspectRatio: 1,
-        crossAxisCount: widget.rowNum,
+        crossAxisCount: rowNum,
         children: widgets,
       ),
     );
@@ -449,7 +455,7 @@ class ExpandedIcon extends StatelessWidget {
 class LevelSelect extends StatefulWidget {
   final int level;
   final int lockedLevel;
-  final Function(int level) onPressed;
+  final ValueChanged<int> onPressed;
   const LevelSelect(
       {this.level = 0,
       required this.onPressed,
@@ -545,7 +551,7 @@ class _LevelSelectState extends State<LevelSelect> {
 
 // ホームボタン
 class HomeButton extends StatelessWidget {
-  final Function? onPressed;
+  final VoidCallback? onPressed;
   const HomeButton({super.key, this.onPressed});
 
   @override

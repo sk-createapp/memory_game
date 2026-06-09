@@ -16,16 +16,17 @@ class GameInfoNotifier extends StateNotifier<GameInfo> {
   GameInfoNotifier()
       : super(GameInfo(appVersion: DefNum.appVersion, clearNum: 0)) {
     _loadGameInfo();
+  }
+
+  Future<void> _loadGameInfo() async {
+    final savedGameInfo = await GameInfo.getGameInfo();
+    state = savedGameInfo ?? state;
 
     //アプリがバージョンアップしていたらバージョン情報を更新
     if (state.appVersion != DefNum.appVersion) {
       state = state.copyWith(appVersion: DefNum.appVersion);
-      _saveGameInfo();
+      await _saveGameInfo();
     }
-  }
-
-  Future<void> _loadGameInfo() async {
-    state = await GameInfo.getGameInfo() ?? state;
   }
 
   Future<void> _saveGameInfo() async {

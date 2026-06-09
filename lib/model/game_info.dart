@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class GameInfo {
   final double appVersion;
   final int clearNum;
-  GameInfo({
+  const GameInfo({
     required this.appVersion,
     required this.clearNum,
   });
@@ -31,8 +31,8 @@ class GameInfo {
 
   static GameInfo fromJson(Map<String, dynamic> json) {
     return GameInfo(
-      appVersion: json['appVersion'],
-      clearNum: json['clearNum'],
+      appVersion: (json['appVersion'] as num).toDouble(),
+      clearNum: json['clearNum'] as int,
     );
   }
 
@@ -51,7 +51,7 @@ class GameInfo {
       if (json == null) {
         return null;
       } else {
-        return Future<GameInfo>.value(GameInfo.fromJson(jsonDecode(json)));
+        return GameInfo.fromJson(jsonDecode(json) as Map<String, dynamic>);
       }
     } catch (e) {
       return null;

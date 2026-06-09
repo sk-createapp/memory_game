@@ -13,12 +13,12 @@ class TargetItem {
 
 //テーブルに表示するアイテム
 class TableItem {
-  String? icon;
+  final String? icon;
   final bool isShowItem;
   final bool isAnswerItem;
-  String? answeredIcon;
+  final String? answeredIcon;
 
-  TableItem({
+  const TableItem({
     this.icon,
     required this.isShowItem,
     required this.isAnswerItem,
@@ -48,13 +48,22 @@ class ItemTableInfo {
   final int answerItemNum; //表示するアイテムの数
   final Duration? memorizeTime; //回答時間
 
-  ItemTableInfo({
+  const ItemTableInfo({
     required this.tableItems,
     required this.columnNum,
     required this.rowNum,
     required this.answerItemNum,
     this.memorizeTime,
   });
+
+  List<int> get answerItemIndexes => [
+        for (int i = 0; i < tableItems.length; i++)
+          if (tableItems[i].isAnswerItem) i,
+      ];
+
+  bool get isAnswerComplete =>
+      tableItems.where((item) => item.answeredIcon != null).length ==
+      answerItemNum;
 
   ItemTableInfo copyWith({
     List<TableItem>? tableItems,

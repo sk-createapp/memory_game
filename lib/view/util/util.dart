@@ -1,63 +1,67 @@
+import 'dart:math';
+
 import 'package:memory_game/constant/image_path.dart';
 import 'package:memory_game/model/item_table_info.dart';
 import 'package:memory_game/model/level_infos.dart';
 
 //選択肢を生成し取得
 List<String> getItemChoices(
-    int num, List<TableItem> tableItems, List<String> icons) {
-  List<String> ret = [];
-  List<String> ans = [];
-  int answerItemNum = 0;
+  int num,
+  List<TableItem> tableItems,
+  List<String> icons, {
+  Random? random,
+}) {
+  final answerIcons = tableItems
+      .where((item) => item.isAnswerItem && item.icon != null)
+      .map((item) => item.icon!)
+      .toSet()
+      .toList();
+  final distractors = icons
+      .where((icon) => !answerIcons.contains(icon))
+      .toList()
+    ..shuffle(random);
 
-  ret = List.of(defImages);
-
-  //アイコン全リストから回答対象を除外しておく
-  for (var element in tableItems) {
-    if (element.isAnswerItem &&
-        element.icon != null &&
-        ans.contains(element.icon) == false) {
-      ret.remove(element.icon!);
-      ans.add(element.icon!);
-      answerItemNum++;
-    }
+  final distractorNum = num - answerIcons.length;
+  if (distractorNum < 0 || distractorNum > distractors.length) {
+    throw ArgumentError.value(num, 'num', 'Invalid choice count.');
   }
 
-  //アイコン全リストを選択肢数がnumになるように減らす
-  ret.shuffle();
-  ret.removeRange(num - answerItemNum, ret.length);
-
-  //回答対象を含めてシャッフル
-  for (var element in ans) {
-    ret.add(element);
-  }
-  ret.shuffle();
-
-  return ret;
+  return [
+    ...distractors.take(distractorNum),
+    ...answerIcons,
+  ]..shuffle(random);
 }
 
 //全問正解かを返す
 bool isAllCorrect(List<TableItem> tableItems, int answerNum) {
-  return tableItems.where((element) {
-        if (element.isAnswerItem && element.answeredIcon == element.icon) {
-          return true;
-        }
-        return false;
-      }).length ==
+  return tableItems
+          .where((item) => item.isAnswerItem && item.answeredIcon == item.icon)
+          .length ==
       answerNum;
+}
+
+bool isCompletedAnswer(ItemTableInfo itemTableInfo) =>
+    itemTableInfo.isAnswerComplete;
+
+int getLockedLevel(List<LevelInfo> levelInfos) {
+  final lockedLevel = levelInfos.indexWhere((levelInfo) => levelInfo.isLocked);
+  return lockedLevel == -1 ? levelInfos.length + 1 : lockedLevel;
 }
 
 //ランク（最高クリアレベル）を取得
 //クリアレベルなし：-1
 int getRank(List<LevelInfo> levelInfos) {
-  int ret = -1;
-  for (int i = 0; i < defLevelImages.length; i++) {
-    if (levelInfos[i].recordInfos.isNotEmpty) {
-      ret = i;
-    }
+  final lastLevelIndex = min(defLevelImages.length, levelInfos.length) - 1;
+  for (int i = lastLevelIndex; i >= 0; i--) {
+    if (levelInfos[i].recordInfos.isNotEmpty) return i;
   }
-  return ret;
+  return -1;
 }
 
 String getFormattedTime(Duration time) {
-  return "${time.inMinutes.toString().padLeft(2, "0")}:${(time.inSeconds % 60).toString().padLeft(2, "0")}.${(((time.inMilliseconds % 1000) / 10).floor().toString().padLeft(2, "0"))}";
+  final minutes = time.inMinutes.toString().padLeft(2, '0');
+  final seconds = (time.inSeconds % 60).toString().padLeft(2, '0');
+  final centiseconds =
+      ((time.inMilliseconds % 1000) ~/ 10).toString().padLeft(2, '0');
+  return '$minutes:$seconds.$centiseconds';
 }

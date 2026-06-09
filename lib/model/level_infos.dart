@@ -8,7 +8,7 @@ class RecordInfo {
   final Duration memorizeTime;
   final DateTime recordedDate;
 
-  RecordInfo({
+  const RecordInfo({
     required this.memorizeTime,
     required this.recordedDate,
   });
@@ -22,46 +22,57 @@ class RecordInfo {
 
   Map<String, dynamic> toJson() {
     return {
-      'memorizeTime': memorizeTime.toString(),
-      'recordedDate': recordedDate.toString(),
+      'memorizeTimeMicroseconds': memorizeTime.inMicroseconds,
+      'recordedDate': recordedDate.toIso8601String(),
     };
   }
 
   static RecordInfo fromJson(Map<String, dynamic> json) {
-    int hours = int.parse(json['memorizeTime'].toString().split(":")[0]);
-    int minutes = int.parse(json['memorizeTime'].toString().split(":")[1]);
-    int seconds =
-        int.parse(json['memorizeTime'].toString().split(":")[2].split(".")[0]);
-    int microseconds = int.parse(json['memorizeTime'].toString().split(".")[1]);
-
     return RecordInfo(
-      memorizeTime: Duration(
-        hours: hours,
-        minutes: minutes,
-        seconds: seconds,
-        microseconds: microseconds,
-      ),
-      recordedDate: DateTime.parse(json['recordedDate']),
+      memorizeTime: _parseDuration(json),
+      recordedDate: DateTime.parse(json['recordedDate'] as String),
+    );
+  }
+
+  static Duration _parseDuration(Map<String, dynamic> json) {
+    final microseconds = json['memorizeTimeMicroseconds'];
+    if (microseconds is int) {
+      return Duration(microseconds: microseconds);
+    }
+
+    final value = json['memorizeTime'].toString();
+    final parts = value.split(':');
+    final secondsParts = parts[2].split('.');
+    return Duration(
+      hours: int.parse(parts[0]),
+      minutes: int.parse(parts[1]),
+      seconds: int.parse(secondsParts[0]),
+      microseconds: int.parse(secondsParts[1]),
     );
   }
 }
 
 //レベルごとの情報
 class LevelInfo {
-  List<RecordInfo> recordInfos;
-  bool isLocked;
+  final List<RecordInfo> recordInfos;
+  final bool isLocked;
 
-  LevelInfo({
+  const LevelInfo({
     required this.recordInfos,
     this.isLocked = false,
   });
 
-  LevelInfo copy() {
+  LevelInfo copyWith({
+    List<RecordInfo>? recordInfos,
+    bool? isLocked,
+  }) {
     return LevelInfo(
-      recordInfos: List.of(recordInfos.map((e) => e.copy())),
-      isLocked: isLocked,
+      recordInfos: List.unmodifiable(recordInfos ?? this.recordInfos),
+      isLocked: isLocked ?? this.isLocked,
     );
   }
+
+  LevelInfo copy() => copyWith();
 
   Map<String, dynamic> toJson() {
     return {
@@ -71,32 +82,35 @@ class LevelInfo {
   }
 
   static LevelInfo fromJson(Map<String, dynamic> json) {
+    final recordInfos = json['recordInfos'] as List<dynamic>;
     return LevelInfo(
-      recordInfos: json['recordInfos']
-          .map<RecordInfo>((e) => RecordInfo.fromJson(e))
-          .toList(),
-      isLocked: json['isLocked'],
+      recordInfos: List.unmodifiable(recordInfos
+          .cast<Map<String, dynamic>>()
+          .map<RecordInfo>(RecordInfo.fromJson)),
+      isLocked: json['isLocked'] as bool,
     );
   }
 
   // SP保存
   static Future<void> saveLevelInfos(List<LevelInfo> levelInfos) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String json =
-        levelInfos.map((e) => jsonEncode(e.toJson())).toList().toString();
+    final String json = jsonEncode(levelInfos.map((e) => e.toJson()).toList());
     await prefs.setString(SpKey.levelInfos.name, json);
   }
 
   // SP取得
-  static Future<List?> getLevelInfos() async {
+  static Future<List<LevelInfo>?> getLevelInfos() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       final String? json = prefs.getString(SpKey.levelInfos.name);
       if (json == null) {
         return null;
       } else {
-        return Future<List>.value(
-            jsonDecode(json).map((e) => LevelInfo.fromJson(e)).toList());
+        final decoded = jsonDecode(json) as List<dynamic>;
+        return decoded
+            .cast<Map<String, dynamic>>()
+            .map<LevelInfo>(LevelInfo.fromJson)
+            .toList();
       }
     } catch (e) {
       return null;

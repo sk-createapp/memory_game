@@ -13,16 +13,17 @@ class LevelInfoNotifier extends StateNotifier<List<LevelInfo>> {
       : super([
           for (int i = 0; i < DefNum.maxLevel; i++)
             LevelInfo(
-                recordInfos: [],
-                isLocked: (i >= DefNum.defaultLockedLevel) ? true : false)
+              recordInfos: const [],
+              isLocked: i >= DefNum.defaultLockedLevel,
+            )
         ]) {
     _loadLevelInfos();
   }
 
   Future<void> _loadLevelInfos() async {
-    List? levelInfos = (await LevelInfo.getLevelInfos());
+    final levelInfos = await LevelInfo.getLevelInfos();
     if (levelInfos != null) {
-      state = List.of(levelInfos.cast<LevelInfo>().map((e) => e.copy()));
+      state = List.of(levelInfos.map((e) => e.copy()));
     }
   }
 
@@ -32,24 +33,23 @@ class LevelInfoNotifier extends StateNotifier<List<LevelInfo>> {
 
   //レコードの追加
   void addRecord(int levelIndex, RecordInfo recordInfo) {
-    state[levelIndex].recordInfos.add(recordInfo);
+    final nextState = List<LevelInfo>.of(state);
+    final nextRecords = [
+      ...nextState[levelIndex].recordInfos,
+      recordInfo,
+    ]..sort((a, b) => a.memorizeTime.compareTo(b.memorizeTime));
 
-    //レコードをソート
-    state[levelIndex]
-        .recordInfos
-        .sort((a, b) => a.memorizeTime.compareTo(b.memorizeTime));
+    nextState[levelIndex] = nextState[levelIndex].copyWith(
+      recordInfos: nextRecords.take(DefNum.recordNum).toList(),
+    );
 
-    //レコード数は10以内にする
-    while (state[levelIndex].recordInfos.length > DefNum.recordNum) {
-      state[levelIndex].recordInfos.removeLast();
+    if (levelIndex + 1 < nextState.length &&
+        nextState[levelIndex + 1].isLocked) {
+      nextState[levelIndex + 1] =
+          nextState[levelIndex + 1].copyWith(isLocked: false);
     }
 
-    //次のレベルがロックされていたら解除する
-    if (levelIndex + 1 < state.length && state[levelIndex + 1].isLocked) {
-      state[levelIndex + 1].isLocked = false;
-    }
-
-    state = List.of(state);
+    state = nextState;
 
     //SP保存
     _saveLevelInfos();

@@ -4,9 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:memory_game/constant/color_constant.dart';
 import 'package:memory_game/constant/image_path.dart';
-import 'package:memory_game/constant/num_constant.dart';
 import 'package:memory_game/view/util/extension.dart';
-import 'package:memory_game/model/level_infos.dart';
 import 'package:memory_game/state/app_info_state.dart';
 import 'package:memory_game/services/admob.dart';
 import 'package:memory_game/state/item_table_info_state.dart';
@@ -158,7 +156,7 @@ class HomeView extends ConsumerWidget {
                     //レベル選択ピッカー
                     LevelSelect(
                         level: gameLevel,
-                        lockedLevel: _getLockedLevel(levelInfos),
+                        lockedLevel: getLockedLevel(levelInfos),
                         onPressed: (level) {
                           ref.read(gameLevelProvider.notifier).state = level;
                         }),
@@ -216,15 +214,4 @@ class HomeView extends ConsumerWidget {
       ),
     );
   }
-}
-
-// ロック中のレベルを取得する関数
-int _getLockedLevel(List<LevelInfo> levelInfos) {
-  for (int i = 0; i < levelInfos.length; i++) {
-    if (levelInfos[i].isLocked == true) {
-      return i;
-    }
-  }
-  // ロック中のレベルがない場合、最大レベル+1を返す
-  return DefNum.maxLevel + 1;
 }

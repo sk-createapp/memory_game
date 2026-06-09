@@ -162,7 +162,7 @@ class _AnswerViewState extends ConsumerState<ResultView> {
     if (isAllCorrect(itemTableInfo.tableItems, itemTableInfo.answerItemNum)) {
       Duration? duration = itemTableInfo.memorizeTime;
       if (duration != null) {
-        ret = "Time ${getFormattedTime(duration)}}";
+        ret = "Time ${getFormattedTime(duration)}";
       }
     }
 

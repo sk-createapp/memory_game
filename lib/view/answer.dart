@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:memory_game/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -31,7 +30,6 @@ class _AnswerViewState extends ConsumerState<AnswerView> {
   int? _selectedAnswerItemIndex;
   int? _selectedChoiceIndex;
   final _draggableController = DraggableScrollableController();
-  final List<int> _answerTableItemIndexies = [];
 
   @override
   Widget build(BuildContext context) {
@@ -39,8 +37,8 @@ class _AnswerViewState extends ConsumerState<AnswerView> {
     final answerItemHeights = ref.watch(answerItemHeightsProvider);
     final gameLevel = ref.watch(gameLevelProvider);
 
-    //回答アイテムに関するクラス内変数の設定
-    setAnswerItemIndex(itemTableInfo);
+    final answerTableItemIndexes = itemTableInfo.answerItemIndexes;
+    _selectedAnswerItemIndex ??= answerTableItemIndexes.isEmpty ? null : 0;
 
     return PopScope(
       canPop: false,
@@ -103,7 +101,8 @@ class _AnswerViewState extends ConsumerState<AnswerView> {
                     //アイテムテーブル
                     SizedBox(
                         width: itemTableWidth(),
-                        child: answerTable(itemTableInfo)),
+                        child:
+                            answerTable(itemTableInfo, answerTableItemIndexes)),
                     Expanded(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.end,
@@ -116,7 +115,7 @@ class _AnswerViewState extends ConsumerState<AnswerView> {
                               onPressed: () {
                                 final itemTableInfo =
                                     ref.read(itemTableInfoProvider);
-                                if (_isCompletedAnswer(itemTableInfo)) {
+                                if (isCompletedAnswer(itemTableInfo)) {
                                   if (isAllCorrect(itemTableInfo.tableItems,
                                           DefNum.answerNum) &&
                                       itemTableInfo.memorizeTime != null) {
@@ -163,22 +162,13 @@ class _AnswerViewState extends ConsumerState<AnswerView> {
                 ),
               ),
               //選択肢テーブル
-              selectionTable(itemTableInfo, answerItemHeights),
+              selectionTable(
+                  itemTableInfo, answerItemHeights, answerTableItemIndexes),
             ],
           ),
         ),
       ),
     );
-  }
-
-  //回答アイテムに関するクラス内変数の設定
-  void setAnswerItemIndex(ItemTableInfo itemTableInfo) {
-    for (int i = 0; i < itemTableInfo.tableItems.length; i++) {
-      if (itemTableInfo.tableItems[i].isAnswerItem) {
-        _answerTableItemIndexies.add(i);
-        _selectedAnswerItemIndex ??= 0;
-      }
-    }
   }
 
   //アイテムテーブルの幅
@@ -195,16 +185,17 @@ class _AnswerViewState extends ConsumerState<AnswerView> {
   }
 
   //アイテムテーブル
-  Widget answerTable(ItemTableInfo itemTableInfo) {
+  Widget answerTable(
+      ItemTableInfo itemTableInfo, List<int> answerTableItemIndexes) {
     return AnswerTable(
       rowNum: itemTableInfo.rowNum,
       tableItems: itemTableInfo.tableItems,
       selectedIndex: _selectedAnswerItemIndex == null
           ? null
-          : _answerTableItemIndexies[_selectedAnswerItemIndex!],
+          : answerTableItemIndexes[_selectedAnswerItemIndex!],
       onPressed: (index, ansIndex) {
         setState(() {
-          _selectedAnswerItemIndex = _answerTableItemIndexies.indexOf(index);
+          _selectedAnswerItemIndex = answerTableItemIndexes.indexOf(index);
           if (itemTableInfo.tableItems[index].answeredIcon == null) {
             _selectedChoiceIndex = null;
           } else {
@@ -227,7 +218,10 @@ class _AnswerViewState extends ConsumerState<AnswerView> {
 
   //選択肢テーブル
   Widget selectionTable(
-      ItemTableInfo itemTableInfo, List<double> answerItemHeights) {
+    ItemTableInfo itemTableInfo,
+    List<double> answerItemHeights,
+    List<int> answerTableItemIndexes,
+  ) {
     //選択肢生成
     List<Widget> choices = [];
     for (int i = 0; i < 36; i++) {
@@ -251,7 +245,7 @@ class _AnswerViewState extends ConsumerState<AnswerView> {
               if (selectedAnswerItemIndex != null) {
                 //アイテムテーブル更新
                 ref.read(itemTableInfoProvider.notifier).answerItem(
-                    _answerTableItemIndexies[selectedAnswerItemIndex],
+                    answerTableItemIndexes[selectedAnswerItemIndex],
                     widget.iconChoices[i]);
                 //選択肢を閉じる
                 _draggableController.animateTo(_modalMinSize,
@@ -266,23 +260,25 @@ class _AnswerViewState extends ConsumerState<AnswerView> {
               if (_selectedAnswerItemIndex != null) {
                 //アイテムテーブル更新
                 ref.read(itemTableInfoProvider.notifier).answerItem(
-                    _answerTableItemIndexies[_selectedAnswerItemIndex!],
+                    answerTableItemIndexes[_selectedAnswerItemIndex!],
                     widget.iconChoices[i]);
                 //ダブルタップした場合はフォーカスを次の回答アイテムに移動する
-                _selectedAnswerItemIndex = (_selectedAnswerItemIndex! + 1) % 3;
+                _selectedAnswerItemIndex = (_selectedAnswerItemIndex! + 1) %
+                    answerTableItemIndexes.length;
                 _selectedChoiceIndex = itemTableInfo
-                            .tableItems[_answerTableItemIndexies[
+                            .tableItems[answerTableItemIndexes[
                                 _selectedAnswerItemIndex!]]
                             .answeredIcon ==
                         null
                     ? null
                     : widget.iconChoices.indexOf(itemTableInfo
                         .tableItems[
-                            _answerTableItemIndexies[_selectedAnswerItemIndex!]]
+                            answerTableItemIndexes[_selectedAnswerItemIndex!]]
                         .answeredIcon!);
 
                 //選択肢モーダルを回答アイテムの高さまで移動
-                if (_selectedAnswerItemIndex! != 0) {
+                if (_selectedAnswerItemIndex! != 0 &&
+                    _selectedAnswerItemIndex! < answerItemHeights.length) {
                   _draggableController.animateTo(
                       (context.sizeHeight -
                               answerItemHeights[_selectedAnswerItemIndex!]) /
@@ -453,12 +449,4 @@ class GiveUpDialog extends StatelessWidget {
       ),
     );
   }
-}
-
-bool _isCompletedAnswer(ItemTableInfo itemTableInfo) {
-  int answerdNum = itemTableInfo.tableItems.where((element) {
-    return element.answeredIcon != null;
-  }).length;
-
-  return answerdNum == itemTableInfo.answerItemNum;
 }
