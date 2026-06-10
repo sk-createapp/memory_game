@@ -29,12 +29,13 @@ class HomeView extends ConsumerWidget {
         children: [
           Padding(
             padding: const EdgeInsets.all(5.0),
-            child: FittedBox(
-              child: Text(
-                " ${i + 1}.   ${getFormattedTime(levelInfos[gameLevel].recordInfos[i].memorizeTime)}  (${DateFormat('yyyy-MM-dd').format(levelInfos[gameLevel].recordInfos[i].recordedDate)})",
-                style: const TextStyle(
-                  color: DefColor.textBlack,
-                ),
+            child: Text(
+              " ${i + 1}.   ${getFormattedTime(levelInfos[gameLevel].recordInfos[i].memorizeTime)}  (${DateFormat('yyyy-MM-dd').format(levelInfos[gameLevel].recordInfos[i].recordedDate)})",
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: DefColor.textBlack,
+                fontSize: 14,
               ),
             ),
           ),
@@ -54,124 +55,124 @@ class HomeView extends ConsumerWidget {
       child: Scaffold(
         backgroundColor: DefColor.lightBeige,
         body: SafeArea(
-          child: Container(
-            alignment: Alignment.center,
-            child: Stack(
-              children: [
-                //ランク背景画像
-                getRank(levelInfos) == -1
-                    ? Container()
-                    : SizedBox(
-                        height: context.heightByRatio(2 / 3),
-                        child: Align(
-                          alignment: Alignment.center,
-                          child: Opacity(
-                            opacity: 0.3,
-                            child: Image.asset(
-                              defLevelImages[getRank(levelInfos)],
-                            ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final fixedHeight = 96 +
+                  28 +
+                  context.levelSelectHeight +
+                  context.buttonHeight +
+                  50;
+              final gaps = context.sectionGap * 6;
+              final recordHeight = (constraints.maxHeight - fixedHeight - gaps)
+                  .clamp(120.0, 260.0);
+
+              return Stack(
+                children: [
+                  //ランク背景画像
+                  if (getRank(levelInfos) != -1)
+                    Align(
+                      alignment: Alignment.center,
+                      child: Opacity(
+                        opacity: 0.3,
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxWidth: context.contentWidth,
+                            maxHeight: constraints.maxHeight * 0.58,
                           ),
-                        ),
-                      ),
-                Column(
-                  children: [
-                    const Spacer(flex: 2),
-                    //タイトル
-                    Container(
-                      width: context.widthByRatio(0.8),
-                      padding: const EdgeInsets.all(8.0),
-                      child: FittedBox(
-                        child: Text(
-                          AppLocalizations.of(context)!.homeGameTitle,
-                          style: const TextStyle(
-                              color: DefColor.darkBlue,
-                              fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ),
-                    const Spacer(),
-                    //ベストタイム
-                    SizedBox(
-                      width: context.widthByRatio(0.5),
-                      child: FittedBox(
-                        child: Text(
-                          "Level ${gameLevel + 1} Best Time",
-                          style: const TextStyle(
-                            color: DefColor.textBlack,
+                          child: Image.asset(
+                            defLevelImages[getRank(levelInfos)],
+                            fit: BoxFit.contain,
                           ),
                         ),
                       ),
                     ),
-                    //タイム
-                    Container(
-                      padding: const EdgeInsets.all(3.0),
-                      decoration: BoxDecoration(
-                        border:
-                            Border.all(color: DefColor.darkBeige, width: 5.0),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: memorizeTimes.isEmpty
-                          //記録がなければメッセージ表示
-                          ? SizedBox(
-                              height: context.heightByRatio(0.3),
-                              width: context.widthByRatio(0.7),
-                              child: Padding(
-                                padding: const EdgeInsets.all(5.0),
-                                child: Container(
-                                  alignment: Alignment.topLeft,
-                                  padding: const EdgeInsets.all(0.0),
-                                  child: FittedBox(
-                                    child: levelInfos[gameLevel].isLocked
-                                        //レベルがロックされている場合のメッセージ
-                                        ? Text(
-                                            AppLocalizations.of(context)!
-                                                .homeLockedLevel,
-                                            style: const TextStyle(
-                                              color: DefColor.textBlack,
-                                            ),
-                                          )
-                                        //記録がない場合のメッセージ
-                                        : Text(
-                                            AppLocalizations.of(context)!
-                                                .homeNoRecords,
-                                            style: const TextStyle(
-                                              color: DefColor.textBlack,
-                                            ),
-                                          ),
-                                  ),
-                                ),
+                  Center(
+                    child: Padding(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: context.pagePadding),
+                      child: ConstrainedBox(
+                        constraints:
+                            BoxConstraints(maxWidth: context.contentMaxWidth),
+                        child: Column(
+                          children: [
+                            SizedBox(height: context.sectionGap),
+                            //タイトル
+                            Text(
+                              AppLocalizations.of(context)!.homeGameTitle,
+                              maxLines: 2,
+                              textAlign: TextAlign.center,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: DefColor.darkBlue,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 34,
                               ),
-                            )
-                          //記録がある場合は記録を表示
-                          : Scrollbar(
-                              thumbVisibility: true,
-                              child: Container(
-                                  padding: const EdgeInsets.all(7.0),
-                                  height: context.heightByRatio(0.3),
-                                  width: context.widthByRatio(0.7),
-                                  child: ListView(children: memorizeTimes)),
                             ),
-                    ),
-                    const Spacer(),
-                    //レベル選択ピッカー
-                    LevelSelect(
-                        level: gameLevel,
-                        lockedLevel: getLockedLevel(levelInfos),
-                        onPressed: (level) {
-                          ref.read(gameLevelProvider.notifier).state = level;
-                        }),
-                    const Spacer(
-                      flex: 1,
-                    ),
-                    SizedBox(
-                      height: context.widthByRatio(1 / 4),
-                      child: Stack(
-                        children: [
-                          Align(
-                            alignment: Alignment.center,
-                            child:
-                                //スタートボタン
-                                MyTextButton(
+                            SizedBox(height: context.sectionGap),
+                            //ベストタイム
+                            Text(
+                              "Level ${gameLevel + 1} Best Time",
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: DefColor.textBlack,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            //タイム
+                            Container(
+                              width: context.contentWidth,
+                              height: recordHeight,
+                              padding: const EdgeInsets.all(3.0),
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                    color: DefColor.darkBeige, width: 5.0),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: memorizeTimes.isEmpty
+                                  //記録がなければメッセージ表示
+                                  ? Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Align(
+                                        alignment: Alignment.topLeft,
+                                        child: Text(
+                                          levelInfos[gameLevel].isLocked
+                                              //レベルがロックされている場合のメッセージ
+                                              ? AppLocalizations.of(context)!
+                                                  .homeLockedLevel
+                                              //記録がない場合のメッセージ
+                                              : AppLocalizations.of(context)!
+                                                  .homeNoRecords,
+                                          style: const TextStyle(
+                                            color: DefColor.textBlack,
+                                            fontSize: 15,
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                                  //記録がある場合は記録を表示
+                                  : Scrollbar(
+                                      thumbVisibility: true,
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(7.0),
+                                        child:
+                                            ListView(children: memorizeTimes),
+                                      ),
+                                    ),
+                            ),
+                            SizedBox(height: context.sectionGap),
+                            //レベル選択ピッカー
+                            LevelSelect(
+                                level: gameLevel,
+                                lockedLevel: getLockedLevel(levelInfos),
+                                onPressed: (level) {
+                                  ref.read(gameLevelProvider.notifier).state =
+                                      level;
+                                }),
+                            SizedBox(height: context.sectionGap),
+                            //スタートボタン
+                            MyTextButton(
                               backColor: levelInfos[gameLevel].isLocked
                                   ? DefColor.gray
                                   : DefColor.orange,
@@ -196,19 +197,17 @@ class HomeView extends ConsumerWidget {
                                     },
                               text: "Start",
                             ),
-                          ),
-                        ],
+                            const Spacer(),
+                            //バナー
+                            const AdmobBannerWidget(),
+                          ],
+                        ),
                       ),
                     ),
-                    const Spacer(
-                      flex: 3,
-                    ),
-                    //バナー
-                    const AdmobBannerWidget(),
-                  ],
-                ),
-              ],
-            ),
+                  ),
+                ],
+              );
+            },
           ),
         ),
       ),

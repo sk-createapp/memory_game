@@ -1,10 +1,15 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 class AdMobService {
   String getBannerAdUnitId() {
+    if (kIsWeb) {
+      return '';
+    }
+
     // iOSとAndroidで広告ユニットIDを分岐させる
     if (Platform.isAndroid) {
       //TODO テスト用IDなので正式なIDに置換

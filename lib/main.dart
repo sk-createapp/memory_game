@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memory_game/l10n/app_localizations.dart';
@@ -13,7 +14,9 @@ void main() {
   ]);
 
   //Admob広告初期化
-  MobileAds.instance.initialize();
+  if (!kIsWeb) {
+    MobileAds.instance.initialize();
+  }
   runApp(const ProviderScope(child: StartUp()));
 }
 

@@ -6,6 +6,69 @@ import 'package:memory_game/view/util/extension.dart';
 
 typedef AnswerTablePressed = void Function(int index, int ansIndex);
 
+class GameTopBar extends StatelessWidget {
+  final int level;
+  final String? trailingText;
+  final VoidCallback? onHomePressed;
+
+  const GameTopBar({
+    super.key,
+    required this.level,
+    this.trailingText,
+    this.onHomePressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: DefColor.darkBeige,
+      child: SizedBox(
+        height: context.topBarHeight,
+        child: Center(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: context.pagePadding),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: context.contentMaxWidth),
+              child: Row(
+                children: [
+                  HomeButton(onPressed: onHomePressed),
+                  SizedBox(width: context.sectionGap),
+                  Text(
+                    "Level ${level + 1}",
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontFeatures: [FontFeature.tabularFigures()],
+                      color: DefColor.textBlack,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  if (trailingText != null)
+                    Expanded(
+                      child: Text(
+                        trailingText!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.right,
+                        style: const TextStyle(
+                          fontFeatures: [FontFeature.tabularFigures()],
+                          color: DefColor.textBlack,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 //テキストボタン
 class MyTextButton extends StatelessWidget {
   final String text;
@@ -27,25 +90,24 @@ class MyTextButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: context.widthByRatio(widthRatio),
-      height: context.widthByRatio(heightRatio),
+      width: context.buttonWidth(widthRatio),
+      height: context.buttonHeightFor(heightRatio),
       child: TextButton(
         style: ButtonStyle(
           backgroundColor: WidgetStateProperty.all(backColor),
           splashFactory: NoSplash.splashFactory,
         ),
         onPressed: onPressed,
-        child: SizedBox(
-          width: context.widthByRatio(widthRatio * 0.8),
-          height: context.widthByRatio(heightRatio),
-          child: Padding(
-            padding: const EdgeInsets.all(4.0),
-            child: FittedBox(
-              fit: BoxFit.fitHeight,
-              child: Text(
-                text,
-                style: TextStyle(color: textColor),
-              ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          child: Text(
+            text,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: textColor,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
             ),
           ),
         ),
@@ -72,8 +134,7 @@ class MyCircleButton extends StatelessWidget {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         padding: const EdgeInsets.all(0),
-        fixedSize:
-            Size(context.widthByRatio(ratio), context.widthByRatio(ratio)),
+        fixedSize: Size.square(context.circleButtonSize * ratio / (1 / 5)),
         backgroundColor: backColor,
         splashFactory: NoSplash.splashFactory,
         shape: const CircleBorder(),
@@ -218,11 +279,14 @@ class _AnswerTableState extends State<AnswerTable> {
                           icon: widget.tableItems[i].answeredIcon!,
                         )
                       : SizedBox(
-                          height: context.widthByRatio(1 / 10),
-                          child: const FittedBox(
+                          child: const Center(
                             child: Text(
                               "?",
-                              style: TextStyle(color: DefColor.textWhite),
+                              style: TextStyle(
+                                color: DefColor.textWhite,
+                                fontSize: 28,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ),
@@ -417,7 +481,7 @@ class TableIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-        padding: const EdgeInsets.all(5),
+        padding: const EdgeInsets.all(4),
         child: Image.asset(
           icon,
         ));
@@ -434,8 +498,7 @@ class ExpandedIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
-      if (constraints.maxWidth > MediaQuery.of(context).size.width ||
-          constraints.maxHeight > MediaQuery.of(context).size.height) {
+      if (!constraints.hasBoundedWidth || !constraints.hasBoundedHeight) {
         return Container();
       }
       return SizedBox(
@@ -485,7 +548,8 @@ class _LevelSelectState extends State<LevelSelect> {
 
   @override
   Widget build(BuildContext context) {
-    double height = context.widthByRatio(0.2);
+    final height = context.levelSelectHeight;
+    final itemExtent = context.isCompactWidth ? 74.0 : 92.0;
 
     List<Widget> widgets = [];
     for (int i = 0; i < DefNum.maxLevel; i++) {
@@ -515,12 +579,15 @@ class _LevelSelectState extends State<LevelSelect> {
                     curve: Curves.linear);
               },
               child: SizedBox(
-                height: height * 2 / 3 - 3,
-                child: FittedBox(
-                  fit: BoxFit.fitHeight,
+                height: height - 12,
+                child: Center(
                   child: Text(
                     "${i + 1}",
-                    style: const TextStyle(color: DefColor.textWhite),
+                    style: const TextStyle(
+                      color: DefColor.textWhite,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               )),
@@ -528,8 +595,8 @@ class _LevelSelectState extends State<LevelSelect> {
       ));
     }
     return SizedBox(
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.width * 0.2,
+        width: context.contentWidth,
+        height: height,
         child: RotatedBox(
             quarterTurns: -1,
             child: ListWheelScrollView(
@@ -543,7 +610,7 @@ class _LevelSelectState extends State<LevelSelect> {
               },
               offAxisFraction: -1,
               diameterRatio: 100,
-              itemExtent: 100,
+              itemExtent: itemExtent,
               children: widgets,
             )));
   }
@@ -559,8 +626,7 @@ class HomeButton extends StatelessWidget {
     return IconButton(
       style: ElevatedButton.styleFrom(
         padding: const EdgeInsets.all(0),
-        fixedSize:
-            Size(context.widthByRatio(1 / 8), context.widthByRatio(1 / 8)),
+        fixedSize: Size.square(context.homeButtonSize),
         backgroundColor: DefColor.darkBlue,
         splashFactory: NoSplash.splashFactory,
         shape: const CircleBorder(),

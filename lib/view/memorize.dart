@@ -48,186 +48,158 @@ class _MemorizeViewState extends ConsumerState<MemorizeView> {
       child: Scaffold(
         backgroundColor: DefColor.lightBeige,
         body: SafeArea(
-          child: Container(
-            alignment: Alignment.center,
-            child: Column(
-              children: [
-                ColoredBox(
-                  color: DefColor.darkBeige,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        // ホームボタン
-                        HomeButton(
-                          onPressed: () {
-                            if (_timer != null) {
-                              _timer!.cancel();
-                            }
-                          },
-                        ),
-                        SizedBox(
-                          width: context.widthByRatio(0.05),
-                        ),
-                        //レベル
-                        SizedBox(
-                          height: context.widthByRatio(1 / 8),
-                          child: FittedBox(
-                            fit: BoxFit.fitHeight,
-                            child: Text("Level ${gameLevel + 1}",
-                                style: const TextStyle(
-                                  fontFeatures: [FontFeature.tabularFigures()],
-                                  color: DefColor.textBlack,
-                                )),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final actionHeight =
+                  context.circleButtonSize.clamp(context.buttonHeight, 72.0);
+              final tableSize = context.tableSizeFor(
+                constraints,
+                topReserve: context.topBarHeight +
+                    context.guideHeight +
+                    context.sectionGap * 2,
+                bottomReserve: actionHeight + 50 + context.sectionGap * 3,
+              );
+
+              return Column(
+                children: [
+                  GameTopBar(
+                    level: gameLevel,
+                    trailingText: "Time ${getFormattedTime(_time)}",
+                    onHomePressed: () {
+                      if (_timer != null) {
+                        _timer!.cancel();
+                      }
+                    },
+                  ),
+                  //メッセージ
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      context.pagePadding,
+                      context.sectionGap,
+                      context.pagePadding,
+                      0,
+                    ),
+                    child: SizedBox(
+                      width: context.contentWidth,
+                      height: context.guideHeight,
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          AppLocalizations.of(context)!.memorizeGuide,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: DefColor.textBlack,
+                            fontSize: 16,
                           ),
                         ),
-                        //タイム
-                        Expanded(
-                          child: Container(
-                            alignment: Alignment.bottomRight,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: context.sectionGap),
+                  //アイテムテーブル
+                  SizedBox.square(
+                      dimension: tableSize,
+                      child: _isHidden
+                          //隠すボタンの状態によってテーブルを切り替える
+                          ? HiddenTable(
+                              rowNum: itemTableInfo.rowNum,
+                              tableItems: itemTableInfo.tableItems)
+                          : MemorizeTable(
+                              rowNum: itemTableInfo.rowNum,
+                              tableItems: itemTableInfo.tableItems)),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        const Spacer(),
+                        //完了ボタン
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: context.pagePadding),
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                                maxWidth: context.contentMaxWidth),
                             child: SizedBox(
-                              height: context.widthByRatio(1 / 12),
-                              child: FittedBox(
-                                fit: BoxFit.fitHeight,
-                                child: Text("Time ${getFormattedTime(_time)}",
-                                    style: const TextStyle(
-                                      fontFeatures: [
-                                        FontFeature.tabularFigures()
-                                      ],
-                                      color: DefColor.textBlack,
-                                    )),
+                              height: actionHeight,
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  MyTextButton(
+                                      onPressed: () {
+                                        if (_timer != null) {
+                                          _timer!.cancel();
+                                        }
+                                        ref
+                                            .read(
+                                                itemTableInfoProvider.notifier)
+                                            .setMemorizeTime(_time);
+                                        List<String> iconChoices =
+                                            getItemChoices(
+                                                36,
+                                                itemTableInfo.tableItems,
+                                                defImages);
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) => AnswerView(
+                                                  iconChoices: iconChoices)),
+                                        );
+                                      },
+                                      text:
+                                          AppLocalizations.of(context)!.cmnOk),
+                                  //隠すボタン
+                                  Align(
+                                    alignment: Alignment.centerRight,
+                                    child: GestureDetector(
+                                      child: MyCircleButton(
+                                          onPressed: () {},
+                                          child: Text(
+                                            AppLocalizations.of(context)!
+                                                .memorizeHide,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            textAlign: TextAlign.center,
+                                            style: const TextStyle(
+                                              color: DefColor.textWhite,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          )),
+                                      onTapDown: (details) {
+                                        setState(() {
+                                          _isHidden = !_isHidden;
+                                        });
+                                      },
+                                      onTapCancel: () {
+                                        setState(() {
+                                          _isHidden = !_isHidden;
+                                        });
+                                      },
+                                      onTapUp: (details) {
+                                        setState(() {
+                                          _isHidden = !_isHidden;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
                         ),
+                        SizedBox(height: context.sectionGap),
+                        //バナー
+                        const AdmobBannerWidget(),
                       ],
                     ),
                   ),
-                ),
-                //メッセージ
-                Padding(
-                  padding: const EdgeInsets.only(top: 8.0, left: 24, right: 24),
-                  child: SizedBox(
-                    height: context.widthByRatio(0.07),
-                    child: FittedBox(
-                      alignment: Alignment.topLeft,
-                      child: Text(
-                        AppLocalizations.of(context)!.memorizeGuide,
-                        style: const TextStyle(
-                          color: DefColor.textBlack,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                //アイテムテーブル
-                SizedBox(
-                    width: getItemTableWidth(),
-                    child: _isHidden
-                        //隠すボタンの桜花状態によってテーブルを切り替える
-                        ? HiddenTable(
-                            rowNum: itemTableInfo.rowNum,
-                            tableItems: itemTableInfo.tableItems)
-                        : MemorizeTable(
-                            rowNum: itemTableInfo.rowNum,
-                            tableItems: itemTableInfo.tableItems)),
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      const Spacer(
-                        flex: 1,
-                      ),
-                      //完了ボタン
-                      SizedBox(
-                        height: context.widthByRatio(1 / 4),
-                        child: Stack(
-                          children: [
-                            Align(
-                              alignment: Alignment.center,
-                              child: MyTextButton(
-                                  onPressed: () {
-                                    if (_timer != null) {
-                                      _timer!.cancel();
-                                    }
-                                    ref
-                                        .read(itemTableInfoProvider.notifier)
-                                        .setMemorizeTime(_time);
-                                    List<String> iconChoices = getItemChoices(
-                                        36,
-                                        itemTableInfo.tableItems,
-                                        defImages);
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => AnswerView(
-                                              iconChoices: iconChoices)),
-                                    );
-                                  },
-                                  text: AppLocalizations.of(context)!.cmnOk),
-                            ),
-                            //隠すボタン
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: GestureDetector(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: MyCircleButton(
-                                      onPressed: () {},
-                                      child: Text(
-                                        AppLocalizations.of(context)!
-                                            .memorizeHide,
-                                        style: const TextStyle(
-                                            color: DefColor.textWhite),
-                                      )),
-                                ),
-                                onTapDown: (details) {
-                                  setState(() {
-                                    _isHidden = !_isHidden;
-                                  });
-                                },
-                                onTapCancel: () {
-                                  setState(() {
-                                    _isHidden = !_isHidden;
-                                  });
-                                },
-                                onTapUp: (details) {
-                                  setState(() {
-                                    _isHidden = !_isHidden;
-                                  });
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const Spacer(
-                        flex: 2,
-                      ),
-                      //バナー
-                      const AdmobBannerWidget(),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+                ],
+              );
+            },
           ),
         ),
       ),
     );
-  }
-
-  double getItemTableWidth() {
-    //アイテムボックスの幅設定
-    double ret = context.widthByRatio(0.9) *
-        (context.sizeHeight / context.sizeWidth) /
-        1.67;
-
-    if (ret > context.widthByRatio(0.9)) {
-      ret = context.widthByRatio(0.9);
-    }
-
-    return ret;
   }
 }

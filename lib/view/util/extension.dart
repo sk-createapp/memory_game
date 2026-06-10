@@ -1,14 +1,61 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 extension DispSize on BuildContext {
-  double get sizeWidth => MediaQuery.of(this).size.width;
-  double get sizeHeight => MediaQuery.of(this).size.height;
+  Size get screenSize => MediaQuery.sizeOf(this);
+  double get sizeWidth => screenSize.width;
+  double get sizeHeight => screenSize.height;
+  double get shortSide => math.min(sizeWidth, sizeHeight);
 
-  double widthByRatio(double ratio) {
-    return MediaQuery.of(this).size.width * ratio;
+  bool get isCompactWidth => sizeWidth < 360;
+  bool get isTabletWidth => sizeWidth >= 600;
+
+  double get pagePadding {
+    if (isCompactWidth) {
+      return 12;
+    }
+    if (isTabletWidth) {
+      return 32;
+    }
+    return 20;
   }
 
-  double heightByRatio(double ratio) {
-    return MediaQuery.of(this).size.height * ratio;
+  double get contentMaxWidth => isTabletWidth ? 560 : 420;
+  double get contentWidth {
+    return math.min(sizeWidth - pagePadding * 2, contentMaxWidth);
+  }
+
+  double get topBarHeight => isCompactWidth ? 54 : 62;
+  double get guideHeight => isCompactWidth ? 24 : 28;
+  double get buttonHeight => isCompactWidth ? 48 : 54;
+  double get circleButtonSize => isCompactWidth ? 54 : 62;
+  double get homeButtonSize => isCompactWidth ? 44 : 50;
+  double get levelSelectHeight => isCompactWidth ? 66 : 78;
+  double get sectionGap => isCompactWidth ? 10 : 16;
+
+  double buttonWidth([double widthRatio = 0.5]) {
+    final ratioScale = widthRatio / 0.5;
+    final width = contentWidth * 0.68 * ratioScale;
+    return width.clamp(96.0, math.min(contentWidth, 320.0));
+  }
+
+  double buttonHeightFor([double heightRatio = 0.15]) {
+    final ratioScale = heightRatio / 0.15;
+    return (buttonHeight * ratioScale).clamp(42.0, 70.0);
+  }
+
+  double tableSizeFor(BoxConstraints constraints,
+      {double topReserve = 0,
+      double bottomReserve = 0,
+      double maxWidthRatio = 1}) {
+    final availableWidth = math.min(contentWidth, constraints.maxWidth) *
+        maxWidthRatio.clamp(0.0, 1.0);
+    final availableHeight = constraints.maxHeight - topReserve - bottomReserve;
+    final maxTableSize = isTabletWidth ? 540.0 : 420.0;
+
+    return math
+        .min(math.min(availableWidth, availableHeight), maxTableSize)
+        .clamp(180.0, maxTableSize);
   }
 }

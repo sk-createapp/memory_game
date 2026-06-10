@@ -25,14 +25,16 @@ class _MemorizeViewState extends ConsumerState<MenuView> {
           alignment: Alignment.center,
           child: Column(
             children: [
-              SizedBox(
-                height: context.widthByRatio(1 / 10),
-                child: const FittedBox(
-                  child: Text(
-                    "レビューする",
-                    style: TextStyle(
-                      color: DefColor.textBlack,
-                    ),
+              Padding(
+                padding: EdgeInsets.all(context.pagePadding),
+                child: const Text(
+                  "レビューする",
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: DefColor.textBlack,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),

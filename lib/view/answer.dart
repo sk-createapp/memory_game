@@ -45,143 +45,121 @@ class _AnswerViewState extends ConsumerState<AnswerView> {
       child: Scaffold(
         backgroundColor: DefColor.lightBeige,
         body: SafeArea(
-          child: Stack(
-            children: [
-              Container(
-                alignment: Alignment.center,
-                child: Column(
-                  children: [
-                    ColoredBox(
-                      color: DefColor.darkBeige,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            // ホームボタン
-                            const HomeButton(),
-                            SizedBox(
-                              width: context.widthByRatio(0.05),
-                            ),
-                            //レベル
-                            SizedBox(
-                              height: context.widthByRatio(1 / 8),
-                              child: FittedBox(
-                                fit: BoxFit.fitHeight,
-                                child: Text("Level ${gameLevel + 1}",
-                                    style: const TextStyle(
-                                      fontFeatures: [
-                                        FontFeature.tabularFigures()
-                                      ],
-                                      color: DefColor.textBlack,
-                                    )),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final sheetPeekHeight = constraints.maxHeight * _modalMinSize;
+              final tableSize = context.tableSizeFor(
+                constraints,
+                topReserve: context.topBarHeight +
+                    context.guideHeight +
+                    context.sectionGap * 2,
+                bottomReserve: context.buttonHeight +
+                    sheetPeekHeight +
+                    context.sectionGap * 3,
+              );
+
+              return Stack(
+                children: [
+                  Column(
+                    children: [
+                      GameTopBar(level: gameLevel),
+                      //メッセージ
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(
+                          context.pagePadding,
+                          context.sectionGap,
+                          context.pagePadding,
+                          0,
+                        ),
+                        child: SizedBox(
+                          width: context.contentWidth,
+                          height: context.guideHeight,
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              AppLocalizations.of(context)!.answerGuide,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: DefColor.textBlack,
+                                fontSize: 16,
                               ),
                             ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: context.sectionGap),
+                      //アイテムテーブル
+                      SizedBox.square(
+                          dimension: tableSize,
+                          child: answerTable(
+                              itemTableInfo, answerTableItemIndexes)),
+                      Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            const Spacer(),
+                            //完了ボタン
+                            MyTextButton(
+                                onPressed: () {
+                                  final itemTableInfo =
+                                      ref.read(itemTableInfoProvider);
+                                  if (isCompletedAnswer(itemTableInfo)) {
+                                    if (isAllCorrect(itemTableInfo.tableItems,
+                                            DefNum.answerNum) &&
+                                        itemTableInfo.memorizeTime != null) {
+                                      //全問正解なら記録更新する
+                                      int gameLevel =
+                                          ref.read(gameLevelProvider);
+                                      ref
+                                          .read(levelInfosProvider.notifier)
+                                          .addRecord(
+                                              gameLevel,
+                                              RecordInfo(
+                                                  memorizeTime: itemTableInfo
+                                                      .memorizeTime!,
+                                                  recordedDate:
+                                                      DateTime.now()));
+
+                                      //ゲームインフォのクリア回数をインクリメントしてSP/Provider更新
+                                      ref
+                                          .read(gameInfoProvider.notifier)
+                                          .incrementClearNum();
+                                    }
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              const ResultView()),
+                                    );
+                                  } else {
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) {
+                                        //確認画面
+                                        return const GiveUpDialog();
+                                      },
+                                    );
+                                  }
+                                },
+                                text: AppLocalizations.of(context)!.cmnOk),
+                            SizedBox(
+                                height: sheetPeekHeight + context.sectionGap),
                           ],
                         ),
                       ),
-                    ),
-                    //メッセージ
-                    Padding(
-                      padding:
-                          const EdgeInsets.only(top: 8.0, left: 24, right: 24),
-                      child: SizedBox(
-                        height: context.widthByRatio(0.07),
-                        child: FittedBox(
-                          alignment: Alignment.topLeft,
-                          child: Text(
-                            AppLocalizations.of(context)!.answerGuide,
-                            style: const TextStyle(
-                              color: DefColor.textBlack,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    //アイテムテーブル
-                    SizedBox(
-                        width: itemTableWidth(),
-                        child:
-                            answerTable(itemTableInfo, answerTableItemIndexes)),
-                    Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          const Spacer(
-                            flex: 1,
-                          ),
-                          //完了ボタン
-                          MyTextButton(
-                              onPressed: () {
-                                final itemTableInfo =
-                                    ref.read(itemTableInfoProvider);
-                                if (isCompletedAnswer(itemTableInfo)) {
-                                  if (isAllCorrect(itemTableInfo.tableItems,
-                                          DefNum.answerNum) &&
-                                      itemTableInfo.memorizeTime != null) {
-                                    //全問正解なら記録更新する
-                                    int gameLevel = ref.read(gameLevelProvider);
-                                    ref
-                                        .read(levelInfosProvider.notifier)
-                                        .addRecord(
-                                            gameLevel,
-                                            RecordInfo(
-                                                memorizeTime:
-                                                    itemTableInfo.memorizeTime!,
-                                                recordedDate: DateTime.now()));
-
-                                    //ゲームインフォのクリア回数をインクリメントしてSP/Provider更新
-                                    ref
-                                        .read(gameInfoProvider.notifier)
-                                        .incrementClearNum();
-                                  }
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            const ResultView()),
-                                  );
-                                } else {
-                                  showDialog(
-                                    context: context,
-                                    builder: (context) {
-                                      //確認画面
-                                      return const GiveUpDialog();
-                                    },
-                                  );
-                                }
-                              },
-                              text: AppLocalizations.of(context)!.cmnOk),
-                          const Spacer(
-                            flex: 2,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              //選択肢テーブル
-              selectionTable(
-                  itemTableInfo, answerItemHeights, answerTableItemIndexes),
-            ],
+                    ],
+                  ),
+                  //選択肢テーブル
+                  selectionTable(
+                      itemTableInfo, answerItemHeights, answerTableItemIndexes),
+                ],
+              );
+            },
           ),
         ),
       ),
     );
-  }
-
-  //アイテムテーブルの幅
-  double itemTableWidth() {
-    //アイテムボックスの幅設定
-    double ret = context.widthByRatio(0.9) *
-        (context.sizeHeight / context.sizeWidth) /
-        1.67;
-
-    if (ret > context.widthByRatio(0.9)) {
-      ret = context.widthByRatio(0.9);
-    }
-    return ret;
   }
 
   //アイテムテーブル
@@ -319,7 +297,7 @@ class _AnswerViewState extends ConsumerState<AnswerView> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(
-                  height: context.heightByRatio(0.1),
+                  height: context.isCompactWidth ? 64 : 72,
                   child: ListView(
                     controller: scrollController,
                     children: [
@@ -337,7 +315,7 @@ class _AnswerViewState extends ConsumerState<AnswerView> {
                           setState(() {});
                         },
                         child: Container(
-                          width: context.sizeWidth,
+                          width: double.infinity,
                           color: DefColor.none,
                           child: Center(
                             child: Padding(
@@ -351,17 +329,15 @@ class _AnswerViewState extends ConsumerState<AnswerView> {
                                   ),
                                   Padding(
                                     padding: const EdgeInsets.all(8.0),
-                                    child: SizedBox(
-                                      width: context.heightByRatio(1 / 10),
-                                      child: FittedBox(
-                                        fit: BoxFit.fitHeight,
-                                        child: Text(
-                                          AppLocalizations.of(context)!
-                                              .answerChoice,
-                                          style: const TextStyle(
-                                            color: DefColor.textBlack,
-                                          ),
-                                        ),
+                                    child: Text(
+                                      AppLocalizations.of(context)!
+                                          .answerChoice,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        color: DefColor.textBlack,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                   ),
@@ -397,21 +373,19 @@ class GiveUpDialog extends StatelessWidget {
     return AlertDialog(
       backgroundColor: DefColor.darkBeige,
       content: SizedBox(
-        width: context.widthByRatio(0.8),
-        height: context.widthByRatio(0.6),
+        width: context.contentWidth,
+        height: (context.contentWidth * 0.62).clamp(180.0, 260.0),
         child: Column(
           children: [
             const Spacer(),
-            SizedBox(
-              height: context.widthByRatio(1 / 10),
-              child: FittedBox(
-                fit: BoxFit.fitHeight,
-                child: Text(
-                  AppLocalizations.of(context)!.answerConfirm,
-                  style: const TextStyle(
-                    color: DefColor.textBlack,
-                  ),
-                ),
+            Text(
+              AppLocalizations.of(context)!.answerConfirm,
+              maxLines: 3,
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: DefColor.textBlack,
+                fontSize: 18,
               ),
             ),
             const Spacer(),

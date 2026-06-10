@@ -29,112 +29,125 @@ class _AnswerViewState extends ConsumerState<ResultView> {
       child: Scaffold(
         backgroundColor: DefColor.lightBeige,
         body: SafeArea(
-          child: Container(
-            alignment: Alignment.center,
-            child: Column(
-              children: [
-                //メッセージ
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: SizedBox(
-                    width: context.widthByRatio(0.9),
-                    child: FittedBox(
-                      child: Text(
-                        getAboveMessageString(itemTableInfo, gameLevel),
-                        style: const TextStyle(
-                          color: DefColor.textBlack,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final commentHeight = isAllCorrect(
+                      itemTableInfo.tableItems, itemTableInfo.answerItemNum)
+                  ? 52.0
+                  : 0.0;
+              final tableSize = context.tableSizeFor(
+                constraints,
+                topReserve: 72 + context.sectionGap,
+                bottomReserve: context.buttonHeight +
+                    commentHeight +
+                    50 +
+                    context.sectionGap * 4,
+                maxWidthRatio: 0.96,
+              );
+
+              return Center(
+                child: Padding(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: context.pagePadding),
+                  child: ConstrainedBox(
+                    constraints:
+                        BoxConstraints(maxWidth: context.contentMaxWidth),
+                    child: Column(
+                      children: [
+                        SizedBox(height: context.sectionGap),
+                        //メッセージ
+                        Text(
+                          getAboveMessageString(itemTableInfo, gameLevel),
+                          maxLines: 2,
+                          textAlign: TextAlign.center,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: DefColor.textBlack,
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                    ),
-                  ),
-                ),
-                //タイム
-                SizedBox(
-                  height: context.widthByRatio(0.08),
-                  child: FittedBox(
-                    child: Text(
-                      getMemorizeTimeString(itemTableInfo, gameLevel),
-                      style: const TextStyle(
-                        fontSize: 25,
-                        color: DefColor.textBlack,
-                      ),
-                    ),
-                  ),
-                ),
-                //アイテムテーブル
-                SizedBox(
-                    width: getItemTableWidth(),
-                    child: CorrectAnswerTable(
-                        rowNum: itemTableInfo.rowNum,
-                        tableItems: itemTableInfo.tableItems)),
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      const Spacer(
-                        flex: 1,
-                      ),
-                      //ホームボタン
-                      MyTextButton(
-                          onPressed: () {
-                            Navigator.popUntil(
-                                context, (route) => route.isFirst);
-                          },
-                          text: "Home"),
-                      const Spacer(
-                        flex: 1,
-                      ),
-                      isAllCorrect(itemTableInfo.tableItems,
-                              itemTableInfo.answerItemNum)
-                          ? SizedBox(
-                              height: context.widthByRatio(1 / 10),
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 20),
-                                child: Row(children: [
-                                  //コメント
-                                  Image.asset(
-                                    defLevelImages[gameLevel],
-                                  ),
-                                  Container(
-                                      alignment: Alignment.centerRight,
-                                      child: const FittedBox(
-                                        child: Text(
+                        //タイム
+                        Text(
+                          getMemorizeTimeString(itemTableInfo, gameLevel),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 20,
+                            color: DefColor.textBlack,
+                          ),
+                        ),
+                        SizedBox(height: context.sectionGap),
+                        //アイテムテーブル
+                        SizedBox.square(
+                            dimension: tableSize,
+                            child: CorrectAnswerTable(
+                                rowNum: itemTableInfo.rowNum,
+                                tableItems: itemTableInfo.tableItems)),
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              const Spacer(),
+                              //ホームボタン
+                              MyTextButton(
+                                  onPressed: () {
+                                    Navigator.popUntil(
+                                        context, (route) => route.isFirst);
+                                  },
+                                  text: "Home"),
+                              SizedBox(height: context.sectionGap),
+                              isAllCorrect(itemTableInfo.tableItems,
+                                      itemTableInfo.answerItemNum)
+                                  ? SizedBox(
+                                      height: commentHeight,
+                                      child: Row(children: [
+                                        //コメント
+                                        Image.asset(
+                                          defLevelImages[gameLevel],
+                                        ),
+                                        const Text(
                                           "◀",
                                           style: TextStyle(
-                                              color: DefColor.darkBeige),
+                                            color: DefColor.darkBeige,
+                                            fontSize: 22,
+                                          ),
                                         ),
-                                      )),
-                                  Container(
-                                    padding: const EdgeInsets.all(8),
-                                    decoration: BoxDecoration(
-                                      color: DefColor.darkBeige,
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: FittedBox(
-                                      child: Text(
-                                        AppLocalizations.of(context)!
-                                            .resultComment,
-                                        style: const TextStyle(
-                                          color: DefColor.textBlack,
+                                        Expanded(
+                                          child: Container(
+                                            padding: const EdgeInsets.all(8),
+                                            decoration: BoxDecoration(
+                                              color: DefColor.darkBeige,
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                            ),
+                                            child: Text(
+                                              AppLocalizations.of(context)!
+                                                  .resultComment,
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: const TextStyle(
+                                                color: DefColor.textBlack,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          ),
                                         ),
-                                      ),
-                                    ),
-                                  ),
-                                ]),
-                              ),
-                            )
-                          : Container(),
-                      const Spacer(
-                        flex: 1,
-                      ),
-                      //バナー
-                      const AdmobBannerWidget(),
-                    ],
+                                      ]),
+                                    )
+                                  : Container(),
+                              SizedBox(height: context.sectionGap),
+                              //バナー
+                              const AdmobBannerWidget(),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ],
-            ),
+              );
+            },
           ),
         ),
       ),
@@ -164,19 +177,6 @@ class _AnswerViewState extends ConsumerState<ResultView> {
       if (duration != null) {
         ret = "Time ${getFormattedTime(duration)}";
       }
-    }
-
-    return ret;
-  }
-
-  //アイテムテーブルの幅
-  double getItemTableWidth() {
-    double ret = context.widthByRatio(0.9) *
-        (context.sizeHeight / context.sizeWidth) /
-        1.67;
-
-    if (ret > context.widthByRatio(0.8)) {
-      ret = context.widthByRatio(0.8);
     }
 
     return ret;
