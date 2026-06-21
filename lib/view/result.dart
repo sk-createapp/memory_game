@@ -8,6 +8,7 @@ import 'package:memory_game/view/util/extension.dart';
 import 'package:memory_game/state/app_info_state.dart';
 import 'package:memory_game/services/admob.dart';
 import 'package:memory_game/state/item_table_info_state.dart';
+import 'package:memory_game/view/util/pressable.dart';
 import 'package:memory_game/view/util/util.dart';
 import 'package:memory_game/view/util/widget.dart';
 
@@ -19,10 +20,21 @@ class ResultView extends ConsumerStatefulWidget {
 }
 
 class _AnswerViewState extends ConsumerState<ResultView> {
+  bool _celebrated = false;
+
   @override
   Widget build(BuildContext context) {
     final itemTableInfo = ref.watch(itemTableInfoProvider);
     final gameLevel = ref.watch(gameLevelProvider);
+
+    //全問正解なら一度だけ達成感のある触覚フィードバックを再生する
+    if (!_celebrated &&
+        isAllCorrect(itemTableInfo.tableItems, itemTableInfo.answerItemNum)) {
+      _celebrated = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        fireHaptic(PressHaptic.heavy);
+      });
+    }
 
     return PopScope(
       canPop: false,
@@ -92,8 +104,15 @@ class _AnswerViewState extends ConsumerState<ResultView> {
                               //ホームボタン
                               MyTextButton(
                                   onPressed: () {
-                                    Navigator.popUntil(
-                                        context, (route) => route.isFirst);
+                                    // ゲーム終了時にインタースティシャルを表示（頻度制御あり）。
+                                    // 表示の有無にかかわらずホームへ戻る。
+                                    InterstitialAdManager.instance.maybeShow(
+                                      onDone: () {
+                                        if (!context.mounted) return;
+                                        Navigator.popUntil(context,
+                                            (route) => route.isFirst);
+                                      },
+                                    );
                                   },
                                   text: "Home"),
                               SizedBox(height: context.sectionGap),
@@ -128,7 +147,8 @@ class _AnswerViewState extends ConsumerState<ResultView> {
                                               overflow: TextOverflow.ellipsis,
                                               style: const TextStyle(
                                                 color: DefColor.textBlack,
-                                                fontSize: 14,
+                                                fontSize: 15,
+                                                height: 1.3,
                                               ),
                                             ),
                                           ),

@@ -11,6 +11,7 @@ import 'package:memory_game/state/game_info_state.dart';
 import 'package:memory_game/state/item_table_info_state.dart';
 import 'package:memory_game/state/level_infos_state.dart';
 import 'package:memory_game/view/result.dart';
+import 'package:memory_game/view/util/pressable.dart';
 import 'package:memory_game/view/util/util.dart';
 import 'package:memory_game/view/util/widget.dart';
 
@@ -82,7 +83,8 @@ class _AnswerViewState extends ConsumerState<AnswerView> {
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
                                 color: DefColor.textBlack,
-                                fontSize: 16,
+                                fontSize: 17,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ),
@@ -203,77 +205,77 @@ class _AnswerViewState extends ConsumerState<AnswerView> {
     //選択肢生成
     List<Widget> choices = [];
     for (int i = 0; i < 36; i++) {
-      choices.add(Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10), //角の丸み
-          border: Border.all(
-            width: 5,
-            color: (_selectedChoiceIndex == i)
-                ? DefColor.orange
-                : DefColor.none, //枠線の色
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(2.0),
-          child: GestureDetector(
-            //シングルタップ
-            onTap: () {
-              _selectedChoiceIndex = i;
-              final selectedAnswerItemIndex = _selectedAnswerItemIndex;
-              if (selectedAnswerItemIndex != null) {
-                //アイテムテーブル更新
-                ref.read(itemTableInfoProvider.notifier).answerItem(
-                    answerTableItemIndexes[selectedAnswerItemIndex],
-                    widget.iconChoices[i]);
-                //選択肢を閉じる
-                _draggableController.animateTo(_modalMinSize,
+      final selected = _selectedChoiceIndex == i;
+      choices.add(Padding(
+        padding: const EdgeInsets.all(3.0),
+        child: PressableTile(
+          borderRadius: BorderRadius.circular(12),
+          haptic: PressHaptic.selection,
+          //シングルタップ
+          onPressed: () {
+            _selectedChoiceIndex = i;
+            final selectedAnswerItemIndex = _selectedAnswerItemIndex;
+            if (selectedAnswerItemIndex != null) {
+              //アイテムテーブル更新
+              ref.read(itemTableInfoProvider.notifier).answerItem(
+                  answerTableItemIndexes[selectedAnswerItemIndex],
+                  widget.iconChoices[i]);
+              //選択肢を閉じる
+              _draggableController.animateTo(_modalMinSize,
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.linear);
+              setState(() {});
+            }
+          },
+          //ダブルタップ
+          onDoublePressed: () {
+            _selectedChoiceIndex = i;
+            if (_selectedAnswerItemIndex != null) {
+              //アイテムテーブル更新
+              ref.read(itemTableInfoProvider.notifier).answerItem(
+                  answerTableItemIndexes[_selectedAnswerItemIndex!],
+                  widget.iconChoices[i]);
+              //ダブルタップした場合はフォーカスを次の回答アイテムに移動する
+              _selectedAnswerItemIndex = (_selectedAnswerItemIndex! + 1) %
+                  answerTableItemIndexes.length;
+              _selectedChoiceIndex = itemTableInfo
+                          .tableItems[
+                              answerTableItemIndexes[_selectedAnswerItemIndex!]]
+                          .answeredIcon ==
+                      null
+                  ? null
+                  : widget.iconChoices.indexOf(itemTableInfo
+                      .tableItems[
+                          answerTableItemIndexes[_selectedAnswerItemIndex!]]
+                      .answeredIcon!);
+
+              //選択肢モーダルを回答アイテムの高さまで移動
+              if (_selectedAnswerItemIndex! != 0 &&
+                  _selectedAnswerItemIndex! < answerItemHeights.length) {
+                _draggableController.animateTo(
+                    (context.sizeHeight -
+                            answerItemHeights[_selectedAnswerItemIndex!]) /
+                        context.sizeHeight,
                     duration: const Duration(milliseconds: 200),
                     curve: Curves.linear);
-                setState(() {});
+              } else {
+                _draggableController.animateTo(_modalInitSize,
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.linear);
               }
-            },
-            //ダブルタップ
-            onDoubleTap: () {
-              _selectedChoiceIndex = i;
-              if (_selectedAnswerItemIndex != null) {
-                //アイテムテーブル更新
-                ref.read(itemTableInfoProvider.notifier).answerItem(
-                    answerTableItemIndexes[_selectedAnswerItemIndex!],
-                    widget.iconChoices[i]);
-                //ダブルタップした場合はフォーカスを次の回答アイテムに移動する
-                _selectedAnswerItemIndex = (_selectedAnswerItemIndex! + 1) %
-                    answerTableItemIndexes.length;
-                _selectedChoiceIndex = itemTableInfo
-                            .tableItems[answerTableItemIndexes[
-                                _selectedAnswerItemIndex!]]
-                            .answeredIcon ==
-                        null
-                    ? null
-                    : widget.iconChoices.indexOf(itemTableInfo
-                        .tableItems[
-                            answerTableItemIndexes[_selectedAnswerItemIndex!]]
-                        .answeredIcon!);
-
-                //選択肢モーダルを回答アイテムの高さまで移動
-                if (_selectedAnswerItemIndex! != 0 &&
-                    _selectedAnswerItemIndex! < answerItemHeights.length) {
-                  _draggableController.animateTo(
-                      (context.sizeHeight -
-                              answerItemHeights[_selectedAnswerItemIndex!]) /
-                          context.sizeHeight,
-                      duration: const Duration(milliseconds: 200),
-                      curve: Curves.linear);
-                } else {
-                  _draggableController.animateTo(_modalInitSize,
-                      duration: const Duration(milliseconds: 200),
-                      curve: Curves.linear);
-                }
-                setState(() {});
-              }
-            },
-            child: Image.asset(
-              widget.iconChoices[i],
+              setState(() {});
+            }
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              color: selected ? DefColor.orangeSoft : DefColor.darkBeige,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                width: 4,
+                color: selected ? DefColor.select : DefColor.darkBeige,
+              ),
             ),
+            child: TableIcon(icon: widget.iconChoices[i]),
           ),
         ),
       ));

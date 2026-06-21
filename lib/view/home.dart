@@ -35,7 +35,8 @@ class HomeView extends ConsumerWidget {
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
                 color: DefColor.textBlack,
-                fontSize: 14,
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
@@ -43,7 +44,7 @@ class HomeView extends ConsumerWidget {
               padding: const EdgeInsets.all(10.0),
               height: 5.0,
               decoration: BoxDecoration(
-                color: DefColor.darkBeige,
+                color: DefColor.orangeSoft,
                 borderRadius: BorderRadius.circular(10),
               ))
         ],
@@ -116,7 +117,7 @@ class HomeView extends ConsumerWidget {
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
                                 color: DefColor.textBlack,
-                                fontSize: 16,
+                                fontSize: 17,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -126,9 +127,10 @@ class HomeView extends ConsumerWidget {
                               height: recordHeight,
                               padding: const EdgeInsets.all(3.0),
                               decoration: BoxDecoration(
+                                color: DefColor.surface,
                                 border: Border.all(
-                                    color: DefColor.darkBeige, width: 5.0),
-                                borderRadius: BorderRadius.circular(10),
+                                    color: DefColor.darkBeige, width: 4.0),
+                                borderRadius: BorderRadius.circular(18),
                               ),
                               child: memorizeTimes.isEmpty
                                   //記録がなければメッセージ表示
@@ -146,7 +148,8 @@ class HomeView extends ConsumerWidget {
                                                   .homeNoRecords,
                                           style: const TextStyle(
                                             color: DefColor.textBlack,
-                                            fontSize: 15,
+                                            fontSize: 16,
+                                            height: 1.4,
                                           ),
                                         ),
                                       ),
@@ -173,11 +176,8 @@ class HomeView extends ConsumerWidget {
                             SizedBox(height: context.sectionGap),
                             //スタートボタン
                             MyTextButton(
-                              backColor: levelInfos[gameLevel].isLocked
-                                  ? DefColor.gray
-                                  : DefColor.orange,
                               onPressed: levelInfos[gameLevel].isLocked
-                                  ? () {}
+                                  ? null
                                   : () {
                                       final gameLevel =
                                           ref.read(gameLevelProvider);

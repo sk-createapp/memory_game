@@ -1,10 +1,16 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:memory_game/constant/color_constant.dart';
 import 'package:memory_game/constant/num_constant.dart';
 import 'package:memory_game/model/item_table_info.dart';
 import 'package:memory_game/view/util/extension.dart';
+import 'package:memory_game/view/util/pressable.dart';
 
 typedef AnswerTablePressed = void Function(int index, int ansIndex);
+
+// タイルの角丸（高齢者にもやわらかく見えるよう統一）。
+const double _tileRadius = 12;
 
 class GameTopBar extends StatelessWidget {
   final int level;
@@ -20,8 +26,13 @@ class GameTopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ColoredBox(
-      color: DefColor.darkBeige,
+    return Container(
+      decoration: const BoxDecoration(
+        color: DefColor.surface,
+        border: Border(
+          bottom: BorderSide(color: DefColor.darkBeige, width: 2),
+        ),
+      ),
       child: SizedBox(
         height: context.topBarHeight,
         child: Center(
@@ -40,7 +51,7 @@ class GameTopBar extends StatelessWidget {
                     style: const TextStyle(
                       fontFeatures: [FontFeature.tabularFigures()],
                       color: DefColor.textBlack,
-                      fontSize: 22,
+                      fontSize: 23,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -54,7 +65,7 @@ class GameTopBar extends StatelessWidget {
                         style: const TextStyle(
                           fontFeatures: [FontFeature.tabularFigures()],
                           color: DefColor.textBlack,
-                          fontSize: 18,
+                          fontSize: 19,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -69,46 +80,53 @@ class GameTopBar extends StatelessWidget {
   }
 }
 
-//テキストボタン
+//テキストボタン（押すと凹む立体ボタン）
 class MyTextButton extends StatelessWidget {
   final String text;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final Color textColor;
   final Color backColor;
+  final Color? edgeColor;
   final double widthRatio;
   final double heightRatio;
+  final PressHaptic haptic;
 
   const MyTextButton(
       {required this.text,
       required this.onPressed,
       this.textColor = DefColor.textWhite,
       this.backColor = DefColor.orange,
+      this.edgeColor,
       this.widthRatio = 0.5,
       this.heightRatio = 0.15,
+      this.haptic = PressHaptic.medium,
       super.key});
 
   @override
   Widget build(BuildContext context) {
+    final enabled = onPressed != null;
+    final base = enabled ? backColor : DefColor.gray;
+    final edge = enabled ? (edgeColor ?? darken(base)) : DefColor.grayDeep;
+
     return SizedBox(
       width: context.buttonWidth(widthRatio),
       height: context.buttonHeightFor(heightRatio),
-      child: TextButton(
-        style: ButtonStyle(
-          backgroundColor: WidgetStateProperty.all(backColor),
-          splashFactory: NoSplash.splashFactory,
-        ),
+      child: PressableButton(
         onPressed: onPressed,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          child: Text(
-            text,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: textColor,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+        color: base,
+        edgeColor: edge,
+        haptic: haptic,
+        depth: 6,
+        borderRadius: BorderRadius.circular(16),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        child: Text(
+          text,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            color: textColor,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ),
@@ -116,31 +134,39 @@ class MyTextButton extends StatelessWidget {
   }
 }
 
-//〇ボタン
+//〇ボタン（押すと凹む立体ボタン）
 class MyCircleButton extends StatelessWidget {
   final Widget child;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
+  final ValueChanged<bool>? onHoldChanged;
   final Color backColor;
   final double ratio;
+  final PressHaptic haptic;
   const MyCircleButton(
       {required this.child,
-      required this.onPressed,
+      this.onPressed,
+      this.onHoldChanged,
       this.backColor = DefColor.darkBlue,
       this.ratio = 1 / 5,
+      this.haptic = PressHaptic.light,
       super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        padding: const EdgeInsets.all(0),
-        fixedSize: Size.square(context.circleButtonSize * ratio / (1 / 5)),
-        backgroundColor: backColor,
-        splashFactory: NoSplash.splashFactory,
-        shape: const CircleBorder(),
+    final size = context.circleButtonSize * ratio / (1 / 5);
+    const depth = 5.0;
+    return SizedBox(
+      width: size,
+      height: size + depth,
+      child: PressableButton(
+        shape: BoxShape.circle,
+        depth: depth,
+        color: backColor,
+        haptic: haptic,
+        onPressed: onPressed,
+        onHoldChanged: onHoldChanged,
+        child: child,
       ),
-      onPressed: onPressed,
-      child: child,
     );
   }
 }
@@ -161,7 +187,14 @@ class MemorizeTable extends StatelessWidget {
 
     for (var element in tableItems) {
       if (element.icon != null) {
-        widgets.add(TableIcon(icon: element.icon!));
+        // 余白は HiddenTable と揃え、隠す前後で四角のサイズが変わらないようにする。
+        widgets.add(AspectRatio(
+          aspectRatio: 1,
+          child: Padding(
+            padding: const EdgeInsets.all(3.0),
+            child: _TileSurface(child: TableIcon(icon: element.icon!)),
+          ),
+        ));
       } else {
         widgets.add(Container());
       }
@@ -170,6 +203,7 @@ class MemorizeTable extends StatelessWidget {
     return AspectRatio(
       aspectRatio: 1,
       child: GridView.count(
+        physics: const NeverScrollableScrollPhysics(),
         childAspectRatio: 1,
         crossAxisCount: rowNum,
         children: widgets,
@@ -252,59 +286,49 @@ class _AnswerTableState extends State<AnswerTable> {
       int tmpAnsIndex = ansIndex;
       if (widget.tableItems[i].isAnswerItem) {
         //回答対象のアイテムの場合
+        final selected = i == widget.selectedIndex;
         widgets.add(AspectRatio(
             aspectRatio: 1,
             child: Padding(
-                padding: const EdgeInsets.all(2.0),
-                key: _answerItemKeys[ansIndex],
-                child: ElevatedButton(
-                  onPressed: () {
-                    widget.onPressed(i, tmpAnsIndex);
-                  },
-                  style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.all(0),
-                      surfaceTintColor: DefColor.none,
-                      splashFactory: NoSplash.splashFactory,
-                      backgroundColor: DefColor.orange,
-                      side: i == widget.selectedIndex
-                          ? const BorderSide(
-                              color: DefColor.lightBlue, width: 5)
-                          : null,
-                      shape: RoundedRectangleBorder(
-                          side: BorderSide.none,
-                          borderRadius: BorderRadius.circular(0)) //こちらを適用
-                      ),
+              padding: const EdgeInsets.all(3.0),
+              key: _answerItemKeys[ansIndex],
+              child: PressableTile(
+                borderRadius: BorderRadius.circular(_tileRadius),
+                haptic: PressHaptic.selection,
+                onPressed: () {
+                  widget.onPressed(i, tmpAnsIndex);
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: DefColor.orange,
+                    borderRadius: BorderRadius.circular(_tileRadius),
+                    border: selected
+                        ? Border.all(color: DefColor.select, width: 5)
+                        : null,
+                  ),
                   child: widget.tableItems[i].answeredIcon != null
-                      ? TableIcon(
-                          icon: widget.tableItems[i].answeredIcon!,
-                        )
-                      : SizedBox(
-                          child: const Center(
-                            child: Text(
-                              "?",
-                              style: TextStyle(
-                                color: DefColor.textWhite,
-                                fontSize: 28,
-                                fontWeight: FontWeight.bold,
-                              ),
+                      ? TableIcon(icon: widget.tableItems[i].answeredIcon!)
+                      : const Center(
+                          child: Text(
+                            "?",
+                            style: TextStyle(
+                              color: DefColor.textWhite,
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
-                ))));
+                ),
+              ),
+            )));
         ansIndex++;
       } else if (widget.tableItems[i].isShowItem) {
         //回答対象のアイテムでない場合
-        widgets.add(AspectRatio(
+        widgets.add(const AspectRatio(
           aspectRatio: 1,
           child: Padding(
-            padding: const EdgeInsets.all(2.0),
-            child: Container(
-              color: DefColor.darkBeige,
-              child: const SizedBox(
-                width: 10,
-                height: 10,
-              ),
-            ),
+            padding: EdgeInsets.all(3.0),
+            child: _TileSurface(),
           ),
         ));
       } else {
@@ -318,6 +342,7 @@ class _AnswerTableState extends State<AnswerTable> {
     return AspectRatio(
       aspectRatio: 1,
       child: GridView.count(
+        physics: const NeverScrollableScrollPhysics(),
         childAspectRatio: 1,
         crossAxisCount: widget.rowNum,
         children: widgets,
@@ -350,57 +375,57 @@ class _CorrectAnswerTableState extends State<CorrectAnswerTable> {
     for (int i = 0; i < widget.tableItems.length; i++) {
       if (widget.tableItems[i].isAnswerItem) {
         //回答対象のアイテムの場合
+        final isCorrect =
+            widget.tableItems[i].icon == widget.tableItems[i].answeredIcon;
+        final revealed = _pressedItemIndexies.contains(i);
         widgets.add(AspectRatio(
             aspectRatio: 1,
             child: Padding(
-                padding: const EdgeInsets.all(2.0),
-                child: ElevatedButton(
+                padding: const EdgeInsets.all(3.0),
+                child: PressableTile(
+                  borderRadius: BorderRadius.circular(_tileRadius),
+                  haptic: PressHaptic.light,
                   onPressed: () {
-                    if (_pressedItemIndexies.contains(i)) {
+                    if (revealed) {
                       _pressedItemIndexies.remove(i);
                     } else {
                       _pressedItemIndexies.add(i);
                     }
                     setState(() {});
                   },
-                  style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.all(0),
-                      surfaceTintColor: DefColor.none,
-                      splashFactory: NoSplash.splashFactory,
-                      backgroundColor: DefColor.orange,
-                      shape: RoundedRectangleBorder(
-                          side: BorderSide.none,
-                          borderRadius: BorderRadius.circular(0))),
-                  child: Stack(
-                    alignment: AlignmentDirectional.center,
-                    children: [
-                      _pressedItemIndexies.contains(i)
-                          ? TableIcon(icon: widget.tableItems[i].icon!)
-                          : widget.tableItems[i].answeredIcon != null
-                              ? TableIcon(
-                                  icon: widget.tableItems[i].answeredIcon!)
-                              : Container(),
-                      _pressedItemIndexies.contains(i)
-                          ? Container()
-                          : widget.tableItems[i].icon ==
-                                  widget.tableItems[i].answeredIcon
-                              ? Padding(
-                                  padding: const EdgeInsets.all(5.0),
-                                  child: Container(
-                                    padding: const EdgeInsets.all(5),
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: DefColor.none,
-                                      border: Border.all(
-                                          color: DefColor.red, width: 5),
-                                    ),
-                                  ),
-                                )
-                              : const Padding(
-                                  padding: EdgeInsets.all(5),
-                                  child: ExpandedIcon(
-                                      icon: Icons.clear, color: DefColor.red)),
-                    ],
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: DefColor.orange,
+                      borderRadius: BorderRadius.circular(_tileRadius),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: Stack(
+                      alignment: AlignmentDirectional.center,
+                      children: [
+                        revealed
+                            ? TableIcon(icon: widget.tableItems[i].icon!)
+                            : widget.tableItems[i].answeredIcon != null
+                                ? TableIcon(
+                                    icon: widget.tableItems[i].answeredIcon!)
+                                : Container(),
+                        revealed
+                            ? Container()
+                            : isCorrect
+                                //正解：緑のチェックマーク
+                                ? const Padding(
+                                    padding: EdgeInsets.all(6),
+                                    child: ExpandedIcon(
+                                        icon: Icons.circle_outlined,
+                                        color: DefColor.green),
+                                  )
+                                //不正解：赤のバツ
+                                : const Padding(
+                                    padding: EdgeInsets.all(6),
+                                    child: ExpandedIcon(
+                                        icon: Icons.clear,
+                                        color: DefColor.red)),
+                      ],
+                    ),
                   ),
                 ))));
       } else if (widget.tableItems[i].isShowItem) {
@@ -408,11 +433,8 @@ class _CorrectAnswerTableState extends State<CorrectAnswerTable> {
         widgets.add(AspectRatio(
           aspectRatio: 1,
           child: Padding(
-            padding: const EdgeInsets.all(2.0),
-            child: Container(
-              color: DefColor.darkBeige,
-              child: TableIcon(icon: widget.tableItems[i].icon!),
-            ),
+            padding: const EdgeInsets.all(3.0),
+            child: _TileSurface(child: TableIcon(icon: widget.tableItems[i].icon!)),
           ),
         ));
       } else {
@@ -423,6 +445,7 @@ class _CorrectAnswerTableState extends State<CorrectAnswerTable> {
     return AspectRatio(
       aspectRatio: 1,
       child: GridView.count(
+        physics: const NeverScrollableScrollPhysics(),
         childAspectRatio: 1,
         crossAxisCount: widget.rowNum,
         children: widgets,
@@ -448,13 +471,11 @@ class HiddenTable extends StatelessWidget {
     for (int i = 0; i < tableItems.length; i++) {
       if (tableItems[i].isShowItem) {
         //回答対象のアイテムでない場合
-        widgets.add(AspectRatio(
+        widgets.add(const AspectRatio(
           aspectRatio: 1,
           child: Padding(
-            padding: const EdgeInsets.all(2.0),
-            child: Container(
-              color: DefColor.darkBeige,
-            ),
+            padding: EdgeInsets.all(3.0),
+            child: _TileSurface(),
           ),
         ));
       } else {
@@ -465,10 +486,28 @@ class HiddenTable extends StatelessWidget {
     return AspectRatio(
       aspectRatio: 1,
       child: GridView.count(
+        physics: const NeverScrollableScrollPhysics(),
         childAspectRatio: 1,
         crossAxisCount: rowNum,
         children: widgets,
       ),
+    );
+  }
+}
+
+//テーブルのアイテムを載せる地（やわらかい角丸のタイル）
+class _TileSurface extends StatelessWidget {
+  final Widget? child;
+  const _TileSurface({this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: DefColor.darkBeige,
+        borderRadius: BorderRadius.circular(_tileRadius),
+      ),
+      child: child,
     );
   }
 }
@@ -481,10 +520,37 @@ class TableIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-        padding: const EdgeInsets.all(4),
-        child: Image.asset(
-          icon,
-        ));
+      padding: const EdgeInsets.all(4),
+      child: ShadowedImage(icon),
+    );
+  }
+}
+
+//アイコン画像。背景色と同化しないよう、形に沿った柔らかい影を重ねる。
+class ShadowedImage extends StatelessWidget {
+  final String asset;
+  const ShadowedImage(this.asset, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.passthrough,
+      children: [
+        //影：アイコンのシルエットをぼかして少し下にずらす。
+        Transform.translate(
+          offset: const Offset(0, 2),
+          child: ImageFiltered(
+            imageFilter: ui.ImageFilter.blur(sigmaX: 1.8, sigmaY: 1.8),
+            child: Image.asset(
+              asset,
+              color: const Color(0x66000000),
+              colorBlendMode: BlendMode.srcIn,
+            ),
+          ),
+        ),
+        Image.asset(asset),
+      ],
+    );
   }
 }
 
@@ -553,44 +619,54 @@ class _LevelSelectState extends State<LevelSelect> {
 
     List<Widget> widgets = [];
     for (int i = 0; i < DefNum.maxLevel; i++) {
+      final locked = i >= widget.lockedLevel;
+      final selected = _level == i;
+      final Color tileColor = locked
+          ? DefColor.gray
+          : selected
+              ? DefColor.orange
+              : DefColor.lightBlue;
+      final Color textColor = locked
+          ? DefColor.textWhite
+          : selected
+              ? DefColor.textWhite
+              : DefColor.darkBlueDeep;
+
       widgets.add(RotatedBox(
         quarterTurns: 1,
         child: Container(
-          padding: const EdgeInsets.all(3.0),
-          child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.all(0),
-                  surfaceTintColor: DefColor.none,
-                  splashFactory: NoSplash.splashFactory,
-                  backgroundColor: i >= widget.lockedLevel
-                      ? DefColor.gray
-                      : _level == i
-                          ? DefColor.orange
-                          : DefColor.lightBlue,
-                  shape: RoundedRectangleBorder(
-                      side: BorderSide.none,
-                      borderRadius: BorderRadius.circular(0))),
-              onPressed: () {
-                widget.onPressed(i);
-                _level = i;
-                setState(() {});
-                _scrollController.animateToItem(i,
-                    duration: const Duration(milliseconds: 100),
-                    curve: Curves.linear);
-              },
+          padding: const EdgeInsets.all(4.0),
+          child: PressableTile(
+            borderRadius: BorderRadius.circular(_tileRadius),
+            haptic: PressHaptic.selection,
+            onPressed: () {
+              widget.onPressed(i);
+              _level = i;
+              setState(() {});
+              _scrollController.animateToItem(i,
+                  duration: const Duration(milliseconds: 150),
+                  curve: Curves.easeOut);
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: tileColor,
+                borderRadius: BorderRadius.circular(_tileRadius),
+              ),
               child: SizedBox(
                 height: height - 12,
                 child: Center(
                   child: Text(
                     "${i + 1}",
-                    style: const TextStyle(
-                      color: DefColor.textWhite,
-                      fontSize: 22,
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: 23,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
-              )),
+              ),
+            ),
+          ),
         ),
       ));
     }
@@ -603,6 +679,7 @@ class _LevelSelectState extends State<LevelSelect> {
               controller: _scrollController,
               physics: const FixedExtentScrollPhysics(),
               onSelectedItemChanged: (value) {
+                fireHaptic(PressHaptic.selection);
                 final int level = value;
                 widget.onPressed(level);
                 _level = level;
@@ -616,29 +693,33 @@ class _LevelSelectState extends State<LevelSelect> {
   }
 }
 
-// ホームボタン
+// ホームボタン（押すと凹む立体の丸ボタン）
 class HomeButton extends StatelessWidget {
   final VoidCallback? onPressed;
   const HomeButton({super.key, this.onPressed});
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
-      style: ElevatedButton.styleFrom(
-        padding: const EdgeInsets.all(0),
-        fixedSize: Size.square(context.homeButtonSize),
-        backgroundColor: DefColor.darkBlue,
-        splashFactory: NoSplash.splashFactory,
-        shape: const CircleBorder(),
-      ),
-      onPressed: () {
-        final func = onPressed ?? () {};
-        func();
-        Navigator.popUntil(context, (route) => route.isFirst);
-      },
-      icon: const Icon(
-        Icons.home,
-        color: DefColor.lightBeige,
+    final size = context.homeButtonSize;
+    const depth = 5.0;
+    return SizedBox(
+      width: size,
+      height: size + depth,
+      child: PressableButton(
+        shape: BoxShape.circle,
+        depth: depth,
+        color: DefColor.darkBlue,
+        haptic: PressHaptic.medium,
+        onPressed: () {
+          final func = onPressed ?? () {};
+          func();
+          Navigator.popUntil(context, (route) => route.isFirst);
+        },
+        child: const Icon(
+          Icons.home,
+          color: DefColor.textWhite,
+          size: 26,
+        ),
       ),
     );
   }

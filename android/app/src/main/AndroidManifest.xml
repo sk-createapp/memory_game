@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.anak.memory_game">
+    package="com.skcreation.memory_game">
     <application
         android:label="@string/app_name"
         android:name="${applicationName}"

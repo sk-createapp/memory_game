@@ -1,4 +1,4 @@
-package com.anak.memory_game
+package com.skcreation.memory_game
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -10,6 +10,7 @@ import 'package:memory_game/state/app_info_state.dart';
 import 'package:memory_game/services/admob.dart';
 import 'package:memory_game/state/item_table_info_state.dart';
 import 'package:memory_game/view/answer.dart';
+import 'package:memory_game/view/util/pressable.dart';
 import 'package:memory_game/view/util/util.dart';
 import 'package:memory_game/view/util/widget.dart';
 
@@ -90,7 +91,8 @@ class _MemorizeViewState extends ConsumerState<MemorizeView> {
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
                             color: DefColor.textBlack,
-                            fontSize: 16,
+                            fontSize: 17,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
@@ -146,41 +148,32 @@ class _MemorizeViewState extends ConsumerState<MemorizeView> {
                                                   iconChoices: iconChoices)),
                                         );
                                       },
+                                      // 右側の「かくす」ボタンとの間に余白を作る。
+                                      widthRatio: 0.38,
                                       text:
                                           AppLocalizations.of(context)!.cmnOk),
-                                  //隠すボタン
+                                  //隠すボタン（長押しでアイテムを隠す）
                                   Align(
                                     alignment: Alignment.centerRight,
-                                    child: GestureDetector(
-                                      child: MyCircleButton(
-                                          onPressed: () {},
-                                          child: Text(
-                                            AppLocalizations.of(context)!
-                                                .memorizeHide,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            textAlign: TextAlign.center,
-                                            style: const TextStyle(
-                                              color: DefColor.textWhite,
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          )),
-                                      onTapDown: (details) {
+                                    child: MyCircleButton(
+                                      haptic: PressHaptic.medium,
+                                      onHoldChanged: (held) {
                                         setState(() {
-                                          _isHidden = !_isHidden;
+                                          _isHidden = held;
                                         });
                                       },
-                                      onTapCancel: () {
-                                        setState(() {
-                                          _isHidden = !_isHidden;
-                                        });
-                                      },
-                                      onTapUp: (details) {
-                                        setState(() {
-                                          _isHidden = !_isHidden;
-                                        });
-                                      },
+                                      child: Text(
+                                        AppLocalizations.of(context)!
+                                            .memorizeHide,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(
+                                          color: DefColor.textWhite,
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ],
