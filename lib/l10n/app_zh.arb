@@ -16,5 +16,7 @@
 "resultGameClear": "完全的！",
 "resultGameFailure": "失败的...",
 "resultBackHome": "返回主屏幕",
-"resultComment": "你是个天才"
+"resultComment": "你是个天才",
+"resultNewRecord": "新纪录！",
+"homeLastRecord": "最新"
 }

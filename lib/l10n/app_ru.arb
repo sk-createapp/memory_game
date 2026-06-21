@@ -16,5 +16,7 @@
 "resultGameClear": "Полный!",
 "resultGameFailure": "Неуспешный...",
 "resultBackHome": "Вернуться на домашний экран",
-"resultComment": "Ты гений"
+"resultComment": "Ты гений",
+"resultNewRecord": "Новый рекорд!",
+"homeLastRecord": "Последний"
 }

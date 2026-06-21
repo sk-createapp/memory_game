@@ -5,6 +5,7 @@ import 'package:memory_game/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memory_game/constant/color_constant.dart';
 import 'package:memory_game/constant/image_path.dart';
+import 'package:memory_game/constant/text_style.dart';
 import 'package:memory_game/view/util/extension.dart';
 import 'package:memory_game/state/app_info_state.dart';
 import 'package:memory_game/services/admob.dart';
@@ -58,7 +59,8 @@ class _MemorizeViewState extends ConsumerState<MemorizeView> {
                 topReserve: context.topBarHeight +
                     context.guideHeight +
                     context.sectionGap * 2,
-                bottomReserve: actionHeight + 50 + context.sectionGap * 3,
+                bottomReserve:
+                    actionHeight + context.bannerReserve + context.sectionGap * 3,
               );
 
               return Column(
@@ -89,11 +91,7 @@ class _MemorizeViewState extends ConsumerState<MemorizeView> {
                           AppLocalizations.of(context)!.memorizeGuide,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: DefColor.textBlack,
-                            fontSize: 17,
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: AppText.guide,
                         ),
                       ),
                     ),
@@ -170,8 +168,8 @@ class _MemorizeViewState extends ConsumerState<MemorizeView> {
                                         textAlign: TextAlign.center,
                                         style: const TextStyle(
                                           color: DefColor.textWhite,
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.bold,
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w800,
                                         ),
                                       ),
                                     ),

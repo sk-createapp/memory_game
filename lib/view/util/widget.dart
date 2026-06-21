@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:memory_game/constant/color_constant.dart';
 import 'package:memory_game/constant/num_constant.dart';
+import 'package:memory_game/constant/text_style.dart';
 import 'package:memory_game/model/item_table_info.dart';
 import 'package:memory_game/view/util/extension.dart';
 import 'package:memory_game/view/util/pressable.dart';
@@ -44,15 +45,14 @@ class GameTopBar extends StatelessWidget {
                 children: [
                   HomeButton(onPressed: onHomePressed),
                   SizedBox(width: context.sectionGap),
-                  Text(
-                    "Level ${level + 1}",
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontFeatures: [FontFeature.tabularFigures()],
-                      color: DefColor.textBlack,
-                      fontSize: 23,
-                      fontWeight: FontWeight.bold,
+                  // 端末幅やシステム文字サイズが大きい場合でも Row があふれない
+                  // よう Flexible で包み、収まらなければ省略表示にする。
+                  Flexible(
+                    child: Text(
+                      "Level ${level + 1}",
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppText.heading,
                     ),
                   ),
                   if (trailingText != null)
@@ -62,12 +62,7 @@ class GameTopBar extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         textAlign: TextAlign.right,
-                        style: const TextStyle(
-                          fontFeatures: [FontFeature.tabularFigures()],
-                          color: DefColor.textBlack,
-                          fontSize: 19,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: AppText.topBarTrailing,
                       ),
                     ),
                 ],
@@ -123,11 +118,7 @@ class MyTextButton extends StatelessWidget {
           text,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            color: textColor,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
+          style: AppText.button.copyWith(color: textColor),
         ),
       ),
     );
@@ -434,7 +425,8 @@ class _CorrectAnswerTableState extends State<CorrectAnswerTable> {
           aspectRatio: 1,
           child: Padding(
             padding: const EdgeInsets.all(3.0),
-            child: _TileSurface(child: TableIcon(icon: widget.tableItems[i].icon!)),
+            child: _TileSurface(
+                child: TableIcon(icon: widget.tableItems[i].icon!)),
           ),
         ));
       } else {
@@ -657,11 +649,7 @@ class _LevelSelectState extends State<LevelSelect> {
                 child: Center(
                   child: Text(
                     "${i + 1}",
-                    style: TextStyle(
-                      color: textColor,
-                      fontSize: 23,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: AppText.tileNumber.copyWith(color: textColor),
                   ),
                 ),
               ),
@@ -690,6 +678,126 @@ class _LevelSelectState extends State<LevelSelect> {
               itemExtent: itemExtent,
               children: widgets,
             )));
+  }
+}
+
+// しっぽ付きの吹き出し。本体（角丸の四角）としっぽ（三角）を
+// 1つの塗りでつなげて描くことで、すき間なく自然な吹き出しになる。
+class SpeechBubble extends StatelessWidget {
+  final Widget child;
+  final Color color;
+
+  // しっぽが向く方向（話し手のいる側）。
+  final TextDirection tailSide;
+
+  // しっぽの大きさ。
+  final double tailWidth;
+  final double tailHeight;
+
+  // 本体の角丸。
+  final double radius;
+
+  // 本体内側の余白。
+  final EdgeInsets padding;
+
+  const SpeechBubble({
+    super.key,
+    required this.child,
+    this.color = DefColor.darkBeige,
+    this.tailSide = TextDirection.ltr,
+    this.tailWidth = 12,
+    this.tailHeight = 18,
+    this.radius = 12,
+    this.padding = const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // しっぽが左向き(ltr)なら左側に、右向き(rtl)なら右側に本体内側の余白を寄せる。
+    final innerPadding = padding.add(EdgeInsets.only(
+      left: tailSide == TextDirection.ltr ? tailWidth : 0,
+      right: tailSide == TextDirection.rtl ? tailWidth : 0,
+    ));
+
+    return CustomPaint(
+      painter: _SpeechBubblePainter(
+        color: color,
+        tailSide: tailSide,
+        tailWidth: tailWidth,
+        tailHeight: tailHeight,
+        radius: radius,
+      ),
+      child: Padding(
+        padding: innerPadding,
+        child: child,
+      ),
+    );
+  }
+}
+
+class _SpeechBubblePainter extends CustomPainter {
+  final Color color;
+  final TextDirection tailSide;
+  final double tailWidth;
+  final double tailHeight;
+  final double radius;
+
+  const _SpeechBubblePainter({
+    required this.color,
+    required this.tailSide,
+    required this.tailWidth,
+    required this.tailHeight,
+    required this.radius,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill
+      ..isAntiAlias = true;
+
+    final isLeft = tailSide == TextDirection.ltr;
+
+    // しっぽぶんを除いた本体の四角。
+    final bodyRect = Rect.fromLTRB(
+      isLeft ? tailWidth : 0,
+      0,
+      isLeft ? size.width : size.width - tailWidth,
+      size.height,
+    );
+
+    final path = Path()
+      ..addRRect(RRect.fromRectAndRadius(bodyRect, Radius.circular(radius)));
+
+    // しっぽ（縦中央から本体の縁に向かう三角）。本体と同じ塗りで重ねる。
+    final cy = size.height / 2;
+    final tail = Path();
+    if (isLeft) {
+      tail
+        ..moveTo(tailWidth, cy - tailHeight / 2)
+        ..lineTo(0, cy)
+        ..lineTo(tailWidth, cy + tailHeight / 2)
+        ..close();
+    } else {
+      final edge = size.width - tailWidth;
+      tail
+        ..moveTo(edge, cy - tailHeight / 2)
+        ..lineTo(size.width, cy)
+        ..lineTo(edge, cy + tailHeight / 2)
+        ..close();
+    }
+
+    canvas.drawPath(Path.combine(PathOperation.union, path, tail), paint);
+  }
+
+  @override
+  bool shouldRepaint(_SpeechBubblePainter oldDelegate) {
+    return oldDelegate.color != color ||
+        oldDelegate.tailSide != tailSide ||
+        oldDelegate.tailWidth != tailWidth ||
+        oldDelegate.tailHeight != tailHeight ||
+        oldDelegate.radius != radius;
   }
 }
 

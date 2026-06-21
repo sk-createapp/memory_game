@@ -16,5 +16,7 @@
 "resultGameClear": "¡Completo!",
 "resultGameFailure": "Fallido...",
 "resultBackHome": "Volver a la pantalla de inicio",
-"resultComment": "Eres un genio"
+"resultComment": "Eres un genio",
+"resultNewRecord": "¡Nuevo récord!",
+"homeLastRecord": "Último"
 }

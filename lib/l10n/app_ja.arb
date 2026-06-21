@@ -16,5 +16,7 @@
 "resultGameClear": "クリア！",
 "resultGameFailure": "残念でした...",
 "resultBackHome": "ホーム画面に戻る",
-"resultComment": "きみは天才"
+"resultComment": "きみは天才",
+"resultNewRecord": "新記録！",
+"homeLastRecord": "前回の記録"
 }

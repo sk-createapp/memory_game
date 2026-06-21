@@ -3,6 +3,7 @@ import 'package:memory_game/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memory_game/constant/color_constant.dart';
 import 'package:memory_game/constant/num_constant.dart';
+import 'package:memory_game/constant/text_style.dart';
 import 'package:memory_game/view/util/extension.dart';
 import 'package:memory_game/model/item_table_info.dart';
 import 'package:memory_game/model/level_infos.dart';
@@ -81,11 +82,7 @@ class _AnswerViewState extends ConsumerState<AnswerView> {
                               AppLocalizations.of(context)!.answerGuide,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                color: DefColor.textBlack,
-                                fontSize: 17,
-                                fontWeight: FontWeight.w600,
-                              ),
+                              style: AppText.guide,
                             ),
                           ),
                         ),
@@ -107,12 +104,27 @@ class _AnswerViewState extends ConsumerState<AnswerView> {
                                   final itemTableInfo =
                                       ref.read(itemTableInfoProvider);
                                   if (isCompletedAnswer(itemTableInfo)) {
+                                    bool isNewRecord = false;
                                     if (isAllCorrect(itemTableInfo.tableItems,
                                             DefNum.answerNum) &&
                                         itemTableInfo.memorizeTime != null) {
                                       //全問正解なら記録更新する
                                       int gameLevel =
                                           ref.read(gameLevelProvider);
+
+                                      //追加前の自己ベストと比べて新記録か判定する
+                                      final existingRecords = ref
+                                          .read(levelInfosProvider)[gameLevel]
+                                          .recordInfos;
+                                      final bestTime = existingRecords.isEmpty
+                                          ? null
+                                          : existingRecords
+                                              .map((e) => e.memorizeTime)
+                                              .reduce((a, b) => a < b ? a : b);
+                                      isNewRecord = bestTime == null ||
+                                          itemTableInfo.memorizeTime! <
+                                              bestTime;
+
                                       ref
                                           .read(levelInfosProvider.notifier)
                                           .addRecord(
@@ -131,8 +143,8 @@ class _AnswerViewState extends ConsumerState<AnswerView> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) =>
-                                              const ResultView()),
+                                          builder: (context) => ResultView(
+                                              isNewRecord: isNewRecord)),
                                     );
                                   } else {
                                     showDialog(
@@ -295,65 +307,65 @@ class _AnswerViewState extends ConsumerState<AnswerView> {
                 topRight: Radius.circular(16),
               ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  height: context.isCompactWidth ? 64 : 72,
-                  child: ListView(
-                    controller: scrollController,
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          if (_draggableController.size > _modalInitSize) {
-                            _draggableController.animateTo(_modalInitSize,
-                                duration: const Duration(milliseconds: 200),
-                                curve: Curves.linear);
-                          } else {
-                            _draggableController.animateTo(_modalMaxSize,
-                                duration: const Duration(milliseconds: 200),
-                                curve: Curves.linear);
-                          }
-                          setState(() {});
-                        },
-                        child: Container(
-                          width: double.infinity,
-                          color: DefColor.none,
-                          child: Center(
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Column(
-                                children: [
-                                  Container(
-                                    width: 50,
-                                    height: 3,
-                                    color: DefColor.darkBeige,
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Text(
-                                      AppLocalizations.of(context)!
-                                          .answerChoice,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                        color: DefColor.textBlack,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ],
+            child: CustomScrollView(
+              // ヘッダーと選択肢グリッドを1つのスクロールにまとめることで、
+              // 選択肢の上など、どのエリアをドラッグしても
+              //（スクロールが先頭まで来ていれば）シートを閉じられるようにする。
+              controller: scrollController,
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                SliverToBoxAdapter(
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () {
+                      if (_draggableController.size > _modalInitSize) {
+                        _draggableController.animateTo(_modalInitSize,
+                            duration: const Duration(milliseconds: 200),
+                            curve: Curves.linear);
+                      } else {
+                        _draggableController.animateTo(_modalMaxSize,
+                            duration: const Duration(milliseconds: 200),
+                            curve: Curves.linear);
+                      }
+                      setState(() {});
+                    },
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: context.isCompactWidth ? 64 : 72,
+                      child: Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              //ドラッグできることを示すつまみ。
+                              Container(
+                                width: 56,
+                                height: 5,
+                                decoration: BoxDecoration(
+                                  color: DefColor.darkBeige,
+                                  borderRadius: BorderRadius.circular(3),
+                                ),
                               ),
-                            ),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(
+                                  AppLocalizations.of(context)!.answerChoice,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppText.subheading,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      )
-                    ],
+                      ),
+                    ),
                   ),
                 ),
-                Expanded(
-                  child: GridView.count(
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(4, 0, 4, 12),
+                  sliver: SliverGrid.count(
                     childAspectRatio: 1,
                     crossAxisCount: 6,
                     children: choices,
@@ -374,6 +386,11 @@ class GiveUpDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return AlertDialog(
       backgroundColor: DefColor.darkBeige,
+      insetPadding: EdgeInsets.symmetric(
+        horizontal: context.pagePadding,
+        vertical: 24,
+      ),
+      contentPadding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
       content: SizedBox(
         width: context.contentWidth,
         height: (context.contentWidth * 0.62).clamp(180.0, 260.0),
@@ -385,38 +402,33 @@ class GiveUpDialog extends StatelessWidget {
               maxLines: 3,
               textAlign: TextAlign.center,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: DefColor.textBlack,
-                fontSize: 18,
-              ),
+              style: AppText.subheading,
             ),
             const Spacer(),
             Row(
               children: [
-                const Spacer(),
-                MyTextButton(
-                  text: AppLocalizations.of(context)!.cmnNo,
-                  backColor: DefColor.darkBlue,
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  widthRatio: 0.3,
+                Expanded(
+                  child: MyTextButton(
+                    text: AppLocalizations.of(context)!.cmnNo,
+                    backColor: DefColor.darkBlue,
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                  ),
                 ),
-                const Spacer(),
-                MyTextButton(
-                  text: AppLocalizations.of(context)!.cmnYes,
-                  backColor: DefColor.darkBlue,
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const ResultView()),
-                    );
-                  },
-                  widthRatio: 0.3,
-                ),
-                const Spacer(
-                  flex: 2,
+                SizedBox(width: context.sectionGap * 1.5),
+                Expanded(
+                  child: MyTextButton(
+                    text: AppLocalizations.of(context)!.cmnYes,
+                    backColor: DefColor.darkBlue,
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const ResultView()),
+                      );
+                    },
+                  ),
                 ),
               ],
             )

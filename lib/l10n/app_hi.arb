@@ -16,5 +16,7 @@
 "resultGameClear": "पूरा!",
 "resultGameFailure": "असफल...",
 "resultBackHome": "होम स्क्रीन पर लौटें",
-"resultComment": "आप जीनियस हैं"
+"resultComment": "आप जीनियस हैं",
+"resultNewRecord": "नया रिकॉर्ड!",
+"homeLastRecord": "हाल का"
 }

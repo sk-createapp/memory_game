@@ -26,13 +26,20 @@ extension DispSize on BuildContext {
     return math.min(sizeWidth - pagePadding * 2, contentMaxWidth);
   }
 
-  double get topBarHeight => isCompactWidth ? 54 : 62;
-  double get guideHeight => isCompactWidth ? 24 : 28;
-  double get buttonHeight => isCompactWidth ? 48 : 54;
-  double get circleButtonSize => isCompactWidth ? 54 : 62;
-  double get homeButtonSize => isCompactWidth ? 44 : 50;
-  double get levelSelectHeight => isCompactWidth ? 66 : 78;
+  double get topBarHeight => isCompactWidth ? 58 : 66;
+  double get guideHeight => isCompactWidth ? 28 : 32;
+  double get buttonHeight => isCompactWidth ? 52 : 58;
+  double get circleButtonSize => isCompactWidth ? 56 : 64;
+  double get homeButtonSize => isCompactWidth ? 46 : 52;
+  double get levelSelectHeight => isCompactWidth ? 70 : 82;
   double get sectionGap => isCompactWidth ? 10 : 16;
+
+  /// アンカー型アダプティブ（Large）バナーのために確保しておく高さ。
+  ///
+  /// このバナーは画面高さの最大15%まで大きくなるため、レイアウトでは
+  /// その上限ぶんを確保しておかないと下端がオーバーフローする。
+  double get bannerReserve =>
+      math.max(50.0, (sizeHeight * 0.15).ceilToDouble());
 
   double buttonWidth([double widthRatio = 0.5]) {
     final ratioScale = widthRatio / 0.5;

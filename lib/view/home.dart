@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:memory_game/constant/color_constant.dart';
 import 'package:memory_game/constant/image_path.dart';
+import 'package:memory_game/constant/text_style.dart';
 import 'package:memory_game/view/util/extension.dart';
 import 'package:memory_game/state/app_info_state.dart';
 import 'package:memory_game/services/admob.dart';
@@ -22,22 +23,57 @@ class HomeView extends ConsumerWidget {
     final levelInfos = ref.watch(levelInfosProvider);
 
     //表示するベストタイムを設定
+    final records = levelInfos[gameLevel].recordInfos;
+
+    // 直近にクリアしたタイム（=最も新しい記録）がランキングのどの順位かを
+    // 特定し、「前回の記録」ラベルで強調表示する。
+    int lastRecordIndex = -1;
+    DateTime? latestDate;
+    for (int i = 0; i < records.length; i++) {
+      final date = records[i].recordedDate;
+      if (latestDate == null || date.isAfter(latestDate)) {
+        latestDate = date;
+        lastRecordIndex = i;
+      }
+    }
+
     List<Widget> memorizeTimes = [];
-    for (int i = 0; i < levelInfos[gameLevel].recordInfos.length; i++) {
+    for (int i = 0; i < records.length; i++) {
+      final isLastRecord = i == lastRecordIndex;
       memorizeTimes.add(Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
             padding: const EdgeInsets.all(5.0),
-            child: Text(
-              " ${i + 1}.   ${getFormattedTime(levelInfos[gameLevel].recordInfos[i].memorizeTime)}  (${DateFormat('yyyy-MM-dd').format(levelInfos[gameLevel].recordInfos[i].recordedDate)})",
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: DefColor.textBlack,
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-              ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    " ${i + 1}.   ${getFormattedTime(records[i].memorizeTime)}  (${DateFormat('yyyy-MM-dd').format(records[i].recordedDate)})",
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppText.record,
+                  ),
+                ),
+                //直近の記録には「前回の記録」ラベルを付ける
+                if (isLastRecord) ...[
+                  const SizedBox(width: 6),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: DefColor.select,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      AppLocalizations.of(context)!.homeLastRecord,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppText.badge,
+                    ),
+                  ),
+                ],
+              ],
             ),
           ),
           Container(
@@ -58,11 +94,11 @@ class HomeView extends ConsumerWidget {
         body: SafeArea(
           child: LayoutBuilder(
             builder: (context, constraints) {
-              final fixedHeight = 96 +
-                  28 +
+              final fixedHeight = 104 +
+                  32 +
                   context.levelSelectHeight +
                   context.buttonHeight +
-                  50;
+                  context.bannerReserve;
               final gaps = context.sectionGap * 6;
               final recordHeight = (constraints.maxHeight - fixedHeight - gaps)
                   .clamp(120.0, 260.0);
@@ -103,11 +139,7 @@ class HomeView extends ConsumerWidget {
                               maxLines: 2,
                               textAlign: TextAlign.center,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                color: DefColor.darkBlue,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 34,
-                              ),
+                              style: AppText.title,
                             ),
                             SizedBox(height: context.sectionGap),
                             //ベストタイム
@@ -115,11 +147,7 @@ class HomeView extends ConsumerWidget {
                               "Level ${gameLevel + 1} Best Time",
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                color: DefColor.textBlack,
-                                fontSize: 17,
-                                fontWeight: FontWeight.bold,
-                              ),
+                              style: AppText.subheading,
                             ),
                             //タイム
                             Container(
@@ -127,7 +155,8 @@ class HomeView extends ConsumerWidget {
                               height: recordHeight,
                               padding: const EdgeInsets.all(3.0),
                               decoration: BoxDecoration(
-                                color: DefColor.surface,
+                                // 背景は透過にして、裏側のランク画像が見えるようにする。
+                                color: DefColor.none,
                                 border: Border.all(
                                     color: DefColor.darkBeige, width: 4.0),
                                 borderRadius: BorderRadius.circular(18),
@@ -146,11 +175,7 @@ class HomeView extends ConsumerWidget {
                                               //記録がない場合のメッセージ
                                               : AppLocalizations.of(context)!
                                                   .homeNoRecords,
-                                          style: const TextStyle(
-                                            color: DefColor.textBlack,
-                                            fontSize: 16,
-                                            height: 1.4,
-                                          ),
+                                          style: AppText.body,
                                         ),
                                       ),
                                     )

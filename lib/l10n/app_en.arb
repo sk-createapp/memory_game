@@ -16,5 +16,7 @@
 "resultGameClear": "Complete!",
 "resultGameFailure": "Failed...",
 "resultBackHome": "Return to the home screen",
-"resultComment": "You're a genius"
+"resultComment": "You're a genius",
+"resultNewRecord": "New Record!",
+"homeLastRecord": "Latest"
 }
