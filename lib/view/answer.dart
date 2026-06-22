@@ -4,12 +4,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memory_game/constant/color_constant.dart';
 import 'package:memory_game/constant/num_constant.dart';
 import 'package:memory_game/constant/text_style.dart';
+import 'package:memory_game/domain/growth.dart';
 import 'package:memory_game/view/util/extension.dart';
 import 'package:memory_game/model/item_table_info.dart';
 import 'package:memory_game/model/level_infos.dart';
 import 'package:memory_game/state/app_info_state.dart';
 import 'package:memory_game/state/game_info_state.dart';
 import 'package:memory_game/state/item_table_info_state.dart';
+import 'package:memory_game/services/sound_service.dart';
 import 'package:memory_game/state/level_infos_state.dart';
 import 'package:memory_game/view/result.dart';
 import 'package:memory_game/view/util/pressable.dart';
@@ -32,6 +34,21 @@ class _AnswerViewState extends ConsumerState<AnswerView> {
   int? _selectedAnswerItemIndex;
   int? _selectedChoiceIndex;
   final _draggableController = DraggableScrollableController();
+
+  @override
+  void initState() {
+    // プレイ画面（答える）では集中の妨げになる操作音を止める（触覚は残す）。
+    SoundService.instance.suppressTaps = true;
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    // プレイ画面を離れたら操作音の抑制を解除する。
+    SoundService.instance.suppressTaps = false;
+    _draggableController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -105,6 +122,7 @@ class _AnswerViewState extends ConsumerState<AnswerView> {
                                       ref.read(itemTableInfoProvider);
                                   if (isCompletedAnswer(itemTableInfo)) {
                                     bool isNewRecord = false;
+                                    GrowthGain? growthGain;
                                     if (isAllCorrect(itemTableInfo.tableItems,
                                             DefNum.answerNum) &&
                                         itemTableInfo.memorizeTime != null) {
@@ -125,7 +143,8 @@ class _AnswerViewState extends ConsumerState<AnswerView> {
                                           itemTableInfo.memorizeTime! <
                                               bestTime;
 
-                                      ref
+                                      //記録追加と同時に育成EXPを加算し、結果を受け取る。
+                                      growthGain = ref
                                           .read(levelInfosProvider.notifier)
                                           .addRecord(
                                               gameLevel,
@@ -144,7 +163,8 @@ class _AnswerViewState extends ConsumerState<AnswerView> {
                                       context,
                                       MaterialPageRoute(
                                           builder: (context) => ResultView(
-                                              isNewRecord: isNewRecord)),
+                                              isNewRecord: isNewRecord,
+                                              growthGain: growthGain)),
                                     );
                                   } else {
                                     showDialog(

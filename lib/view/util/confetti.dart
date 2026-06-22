@@ -8,11 +8,21 @@ import 'package:memory_game/constant/color_constant.dart';
 /// 外部パッケージに依存せず、[AnimationController] と [CustomPainter] だけで
 /// 完結させている。[intense] を true にすると枚数・色・継続時間が増え、
 /// 新記録のときによりにぎやかな演出になる。
+///
+/// [durationSeconds] を指定すると継続時間を上書きできる。延ばした時間いっぱい
+/// 紙吹雪が降り続けて見えるよう、降り始めの遅延と枚数も時間に合わせて増やす。
 class ConfettiOverlay extends StatefulWidget {
   /// 新記録など、より派手にしたいときに true。
   final bool intense;
 
-  const ConfettiOverlay({super.key, this.intense = false});
+  /// 継続時間（秒）の上書き。null なら [intense] に応じた既定値。
+  final double? durationSeconds;
+
+  const ConfettiOverlay({
+    super.key,
+    this.intense = false,
+    this.durationSeconds,
+  });
 
   @override
   State<ConfettiOverlay> createState() => _ConfettiOverlayState();
@@ -46,11 +56,29 @@ class _ConfettiOverlayState extends State<ConfettiOverlay>
 
     // 乱数の種は固定し、毎回同じでも自然に見える範囲でばらつかせる。
     final rnd = math.Random(widget.intense ? 7 : 3);
-    final count = widget.intense ? 260 : 120;
-    _durationSeconds = widget.intense ? 5.5 : 3.4;
-    final maxDelay = widget.intense ? 2.6 : 0.6;
-    // 新記録時は画面の上半分からも降り出し、より早く全体を埋める。
-    final topSpread = widget.intense ? 0.45 : 0.12;
+
+    final int count;
+    final double maxDelay;
+    final double topSpread;
+    final override = widget.durationSeconds;
+    if (override != null) {
+      // 表示時間が指定されたとき（新記録など）は、その時間いっぱい紙吹雪が
+      // 降り続けて見えるよう、降り始めの遅延と枚数を時間に合わせて伸ばす。
+      _durationSeconds = override;
+      // 紙片1枚が画面外へ落ちきるおおよその時間。これを終端から差し引いた
+      // 範囲に降り始めを散らすと、最後まで途切れず降り続ける。
+      const fallSeconds = 1.9;
+      maxDelay = math.max(0.6, override - fallSeconds);
+      // 1秒あたりの枚数（密度）を保ちつつ、長く出すほど総数を増やす。
+      count = (maxDelay * 80).round().clamp(120, 600);
+      topSpread = 0.45;
+    } else {
+      count = widget.intense ? 260 : 120;
+      _durationSeconds = widget.intense ? 5.5 : 3.4;
+      maxDelay = widget.intense ? 2.6 : 0.6;
+      // 新記録時は画面の上半分からも降り出し、より早く全体を埋める。
+      topSpread = widget.intense ? 0.45 : 0.12;
+    }
 
     _confetti = List.generate(count, (i) {
       final shape =

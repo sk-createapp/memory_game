@@ -25,7 +25,7 @@
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>GADApplicationIdentifier</key>
-	<string>ca-app-pub-8385267635438802~1837529571</string>
+	<string>ca-app-pub-8385267635438802~9883058597</string>
 	<key>SKAdNetworkItems</key>
 	<array>
 		<dict>

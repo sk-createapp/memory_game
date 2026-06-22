@@ -16,12 +16,15 @@ const double _tileRadius = 12;
 class GameTopBar extends StatelessWidget {
   final int level;
   final String? trailingText;
+  // trailingText の前に添えるアイコン（タイムの時計など）。
+  final IconData? trailingIcon;
   final VoidCallback? onHomePressed;
 
   const GameTopBar({
     super.key,
     required this.level,
     this.trailingText,
+    this.trailingIcon,
     this.onHomePressed,
   });
 
@@ -55,16 +58,24 @@ class GameTopBar extends StatelessWidget {
                       style: AppText.heading,
                     ),
                   ),
-                  if (trailingText != null)
-                    Expanded(
+                  if (trailingText != null) ...[
+                    const SizedBox(width: 14),
+                    if (trailingIcon != null) ...[
+                      Icon(trailingIcon, size: 22, color: DefColor.textBlack),
+                      const SizedBox(width: 6),
+                    ],
+                    // タイムは左寄せにして左端を固定する。等幅数字を持たない
+                    // フォントでも、数字が変わるたびに位置がブレないようにする。
+                    Flexible(
                       child: Text(
                         trailingText!,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.right,
+                        textAlign: TextAlign.left,
                         style: AppText.topBarTrailing,
                       ),
                     ),
+                  ],
                 ],
               ),
             ),
@@ -183,7 +194,15 @@ class MemorizeTable extends StatelessWidget {
           aspectRatio: 1,
           child: Padding(
             padding: const EdgeInsets.all(3.0),
-            child: _TileSurface(child: TableIcon(icon: element.icon!)),
+            // 覚えている間になんとなくイラストに触れたくなるので、タップに
+            // 触覚と凹みのエフェクトだけで反応する（操作音はプレイ画面では
+            // 抑制済み）。ゲームの状態は変えない＝反応そのものが目的。
+            child: PressableTile(
+              borderRadius: BorderRadius.circular(_tileRadius),
+              haptic: PressHaptic.selection,
+              onPressed: () {},
+              child: _TileSurface(child: TableIcon(icon: element.icon!)),
+            ),
           ),
         ));
       } else {
@@ -590,6 +609,9 @@ class LevelSelect extends StatefulWidget {
 class _LevelSelectState extends State<LevelSelect> {
   int _level = 0;
   late FixedExtentScrollController _scrollController;
+  // タップ起因の自動スクロール中は ListWheel の選択フィードバックを抑制し、
+  // 操作音が二重に鳴るのを防ぐ。
+  bool _suppressWheelFeedback = false;
 
   @override
   void initState() {
@@ -631,13 +653,16 @@ class _LevelSelectState extends State<LevelSelect> {
           child: PressableTile(
             borderRadius: BorderRadius.circular(_tileRadius),
             haptic: PressHaptic.selection,
-            onPressed: () {
+            onPressed: () async {
               widget.onPressed(i);
-              _level = i;
-              setState(() {});
-              _scrollController.animateToItem(i,
+              setState(() => _level = i);
+              // タップ→自動スクロールの間は onSelectedItemChanged 側の
+              // フィードバックを止める（タップ側で既に操作音を鳴らしている）。
+              _suppressWheelFeedback = true;
+              await _scrollController.animateToItem(i,
                   duration: const Duration(milliseconds: 150),
                   curve: Curves.easeOut);
+              if (mounted) _suppressWheelFeedback = false;
             },
             child: Container(
               decoration: BoxDecoration(
@@ -667,11 +692,12 @@ class _LevelSelectState extends State<LevelSelect> {
               controller: _scrollController,
               physics: const FixedExtentScrollPhysics(),
               onSelectedItemChanged: (value) {
-                fireHaptic(PressHaptic.selection);
-                final int level = value;
-                widget.onPressed(level);
-                _level = level;
-                setState(() {});
+                // タップ起因の自動スクロール中は二重に鳴らさない。
+                // ドラッグ／フリックでの選択時のみ操作音＋触覚を出す。
+                if (_suppressWheelFeedback) return;
+                firePressFeedback(PressHaptic.selection);
+                widget.onPressed(value);
+                setState(() => _level = value);
               },
               offAxisFraction: -1,
               diameterRatio: 100,

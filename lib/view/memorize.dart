@@ -9,6 +9,7 @@ import 'package:memory_game/constant/text_style.dart';
 import 'package:memory_game/view/util/extension.dart';
 import 'package:memory_game/state/app_info_state.dart';
 import 'package:memory_game/services/admob.dart';
+import 'package:memory_game/services/sound_service.dart';
 import 'package:memory_game/state/item_table_info_state.dart';
 import 'package:memory_game/view/answer.dart';
 import 'package:memory_game/view/util/pressable.dart';
@@ -30,6 +31,8 @@ class _MemorizeViewState extends ConsumerState<MemorizeView> {
 
   @override
   void initState() {
+    // プレイ画面（覚える）では集中の妨げになる操作音を止める（触覚は残す）。
+    SoundService.instance.suppressTaps = true;
     _timer = Timer.periodic(const Duration(milliseconds: 10), // 10ms毎に定期実行
         (Timer timer) {
       setState(() {
@@ -38,6 +41,14 @@ class _MemorizeViewState extends ConsumerState<MemorizeView> {
       });
     });
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    // プレイ画面を離れたら操作音の抑制を解除する。
+    SoundService.instance.suppressTaps = false;
+    _timer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -67,7 +78,8 @@ class _MemorizeViewState extends ConsumerState<MemorizeView> {
                 children: [
                   GameTopBar(
                     level: gameLevel,
-                    trailingText: "Time ${getFormattedTime(_time)}",
+                    trailingIcon: Icons.timer_outlined,
+                    trailingText: getFormattedTime(_time),
                     onHomePressed: () {
                       if (_timer != null) {
                         _timer!.cancel();

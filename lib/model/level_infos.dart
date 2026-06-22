@@ -56,19 +56,24 @@ class RecordInfo {
 class LevelInfo {
   final List<RecordInfo> recordInfos;
   final bool isLocked;
+  //育成キャラの累積経験値（クリアで加算・速いほど多い）。
+  final int exp;
 
   const LevelInfo({
     required this.recordInfos,
     this.isLocked = false,
+    this.exp = 0,
   });
 
   LevelInfo copyWith({
     List<RecordInfo>? recordInfos,
     bool? isLocked,
+    int? exp,
   }) {
     return LevelInfo(
       recordInfos: List.unmodifiable(recordInfos ?? this.recordInfos),
       isLocked: isLocked ?? this.isLocked,
+      exp: exp ?? this.exp,
     );
   }
 
@@ -78,6 +83,7 @@ class LevelInfo {
     return {
       'recordInfos': recordInfos.map((e) => e.toJson()).toList(),
       'isLocked': isLocked,
+      'exp': exp,
     };
   }
 
@@ -88,6 +94,8 @@ class LevelInfo {
           .cast<Map<String, dynamic>>()
           .map<RecordInfo>(RecordInfo.fromJson)),
       isLocked: json['isLocked'] as bool,
+      // 旧データ互換: exp が無ければ 0。
+      exp: (json['exp'] as int?) ?? 0,
     );
   }
 

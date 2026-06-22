@@ -1,6 +1,26 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:memory_game/constant/ad_constant.dart';
+import 'package:memory_game/services/premium_service.dart';
+
+/// 広告SDKの初期化＋同意取得の完了を表すゲート。
+///
+/// バナー等の広告ウィジェットはこの完了を待ってからロードする。
+/// （未初期化のまま load すると失敗して広告が表示されないため）
+class AdsBootstrap {
+  AdsBootstrap._();
+  static final Completer<void> _ready = Completer<void>();
+
+  /// 初期化＋同意取得が完了すると解決される Future。
+  static Future<void> get ready => _ready.future;
+
+  /// 準備完了をマークする（複数回呼ばれても安全）。
+  static void markReady() {
+    if (!_ready.isCompleted) _ready.complete();
+  }
+}
 
 /// google_mobile_ads のアンカー型アダプティブバナー広告を読み込んで表示するウィジェット。
 ///
@@ -30,8 +50,14 @@ class _AdmobBannerWidgetState extends State<AdmobBannerWidget> {
 
   Future<void> _loadAd() async {
     if (!adsSupported) return;
+    // プレミアム会員には広告を出さないので読み込みもしない。
+    if (PremiumService.instance.isPremium.value) return;
     final adUnitId = AdUnitId.banner;
     if (adUnitId.isEmpty) return;
+
+    // SDK初期化＆同意取得が完了するまで待つ（未初期化での load 失敗を防ぐ）。
+    await AdsBootstrap.ready;
+    if (!mounted) return;
 
     // 画面幅に応じたアンカー型アダプティブバナーサイズを取得する。
     final width = MediaQuery.of(context).size.width.truncate();
@@ -68,17 +94,25 @@ class _AdmobBannerWidgetState extends State<AdmobBannerWidget> {
 
   @override
   Widget build(BuildContext context) {
-    // 読み込み中は同サイズの領域を確保してレイアウトのガタつきを防ぐ。
-    if (!_isLoaded || _bannerAd == null) {
-      return SizedBox(
-        width: _adSize?.width.toDouble() ?? MediaQuery.of(context).size.width,
-        height: _adSize?.height.toDouble() ?? 60,
-      );
-    }
-    return SizedBox(
-      width: _bannerAd!.size.width.toDouble(),
-      height: _bannerAd!.size.height.toDouble(),
-      child: AdWidget(ad: _bannerAd!),
+    // プレミアム会員には広告を出さない。購入後は即座に消えるよう購読する。
+    return ValueListenableBuilder<bool>(
+      valueListenable: PremiumService.instance.isPremium,
+      builder: (context, isPremium, _) {
+        if (isPremium) return const SizedBox.shrink();
+        // 読み込み中は同サイズの領域を確保してレイアウトのガタつきを防ぐ。
+        if (!_isLoaded || _bannerAd == null) {
+          return SizedBox(
+            width:
+                _adSize?.width.toDouble() ?? MediaQuery.of(context).size.width,
+            height: _adSize?.height.toDouble() ?? 60,
+          );
+        }
+        return SizedBox(
+          width: _bannerAd!.size.width.toDouble(),
+          height: _bannerAd!.size.height.toDouble(),
+          child: AdWidget(ad: _bannerAd!),
+        );
+      },
     );
   }
 }
@@ -106,6 +140,8 @@ class InterstitialAdManager {
   /// インタースティシャル広告を事前読込する。すでに保持中／読込中なら何もしない。
   void preload() {
     if (!adsSupported || _isLoading || _ad != null) return;
+    // プレミアム会員には広告を出さないので事前読込もしない。
+    if (PremiumService.instance.isPremium.value) return;
     final adUnitId = AdUnitId.interstitial;
     if (adUnitId.isEmpty) return;
 
@@ -130,6 +166,12 @@ class InterstitialAdManager {
   ///
   /// 表示の有無にかかわらず、最終的に [onDone] を必ず呼ぶ（画面遷移を止めない）。
   void maybeShow({required VoidCallback onDone}) {
+    // プレミアム会員には広告を出さず、そのまま画面遷移する。
+    if (PremiumService.instance.isPremium.value) {
+      onDone();
+      return;
+    }
+
     _gameOverCount++;
 
     final ad = _ad;

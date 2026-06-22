@@ -9,6 +9,10 @@ import 'package:memory_game/constant/color_constant.dart';
 class AppText {
   const AppText._();
 
+  /// アプリ全体で使う丸ゴシック（pubspec.yaml でバンドル）。
+  /// テーマの fontFamily に設定し、各スタイルへ自動で適用される。
+  static const String fontFamily = 'ZenMaruGothic';
+
   // 既定の字間。詰まりすぎを防ぐためわずかに広げる。
   static const double _track = 0.2;
 
@@ -68,9 +72,20 @@ class AppText {
   );
 
   /// ランキングの記録行（数字主体・等幅）。
+  /// 高齢者にも読みやすいよう、やや大きめにする。
   static const TextStyle record = TextStyle(
     color: DefColor.textBlack,
-    fontSize: 17,
+    fontSize: 19,
+    fontWeight: FontWeight.w600,
+    letterSpacing: 0.3,
+    fontFeatures: _tabular,
+  );
+
+  /// ランキング記録行の日付（記録の下に添える）。
+  /// 日付も読み取りやすいよう、しっかりした大きさにする。
+  static const TextStyle recordDate = TextStyle(
+    color: DefColor.textMuted,
+    fontSize: 18,
     fontWeight: FontWeight.w600,
     letterSpacing: 0.3,
     fontFeatures: _tabular,

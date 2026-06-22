@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:memory_game/constant/color_constant.dart';
+import 'package:memory_game/services/sound_service.dart';
 
 /// ハプティクス（触覚フィードバック）の強さ。
 enum PressHaptic { none, selection, light, medium, heavy }
@@ -19,6 +20,18 @@ void fireHaptic(PressHaptic haptic) {
     case PressHaptic.heavy:
       HapticFeedback.heavyImpact();
   }
+}
+
+/// 触覚フィードバックと操作音を「確定の瞬間」にまとめて再生する。
+///
+/// タップ確定で発火する離散的な操作（メニュー項目やレベルホイールの選択、
+/// ダブルタップ）向け。押下と離しが分かれるボタン・タイルでは、触覚は押した
+/// 瞬間（タッチダウン）に [fireHaptic] で、操作音は確定（タッチアップ）で
+/// [SoundService.playTap] を直接呼んで鳴らし分ける。
+/// 操作音は設定でオフにでき（[SoundService] が判断）、その場合は触覚だけになる。
+void firePressFeedback(PressHaptic haptic) {
+  fireHaptic(haptic);
+  SoundService.instance.playTap();
 }
 
 /// 色を一段暗くする（立体ボタンの底面色を自動生成するためのユーティリティ）。
@@ -79,13 +92,18 @@ class _PressableButtonState extends State<PressableButton> {
   }
 
   void _handleTapDown(TapDownDetails _) {
+    // 触覚は押した瞬間に。操作音は確定（タッチアップ）まで待つ。
     fireHaptic(widget.haptic);
     _setPressed(true);
   }
 
   void _handleTapUp(TapUpDetails _) {
     _setPressed(false);
-    widget.onPressed?.call();
+    if (widget.onPressed != null) {
+      // タッチアップ＝押下確定の合図として操作音を鳴らす。
+      SoundService.instance.playTap();
+      widget.onPressed!.call();
+    }
   }
 
   void _handleTapCancel() => _setPressed(false);
@@ -175,6 +193,7 @@ class _PressableTileState extends State<PressableTile> {
       behavior: HitTestBehavior.opaque,
       onTapDown: enabled
           ? (_) {
+              // 触覚は押した瞬間に。操作音は確定（タッチアップ）まで待つ。
               fireHaptic(widget.haptic);
               _setPressed(true);
             }
@@ -182,6 +201,8 @@ class _PressableTileState extends State<PressableTile> {
       onTapUp: enabled
           ? (_) {
               _setPressed(false);
+              // タッチアップ＝押下確定の合図として操作音を鳴らす。
+              SoundService.instance.playTap();
               widget.onPressed!.call();
             }
           : null,
@@ -189,7 +210,7 @@ class _PressableTileState extends State<PressableTile> {
       onDoubleTap: widget.onDoublePressed == null
           ? null
           : () {
-              fireHaptic(widget.haptic);
+              firePressFeedback(widget.haptic);
               widget.onDoublePressed!.call();
             },
       child: AnimatedScale(

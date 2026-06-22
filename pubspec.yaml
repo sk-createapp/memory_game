@@ -43,7 +43,19 @@ dependencies:
   csv: ^8.0.0
   json_annotation:
   google_mobile_ads: ^8.0.0
+  # プレミアム（月額サブスク）課金。広告非表示の権利を提供する。
+  in_app_purchase: ^3.2.0
   flutter_launcher_icons: ^0.14.4
+  flutter_local_notifications: ^22.0.1
+  timezone: ^0.11.0
+  flutter_timezone: ^5.1.0
+  # メニューからの外部リンク（お問い合わせフォーム・利用規約・プライバシーポリシー）を開く。
+  url_launcher: ^6.3.1
+  in_app_review: ^2.0.12
+  # 育成キャラ（手描きSVG）の表示に使用。
+  flutter_svg: ^2.0.10+1
+  # 操作音・結果画面の効果音の再生に使用。
+  audioplayers: ^6.1.0
 
 flutter_icons:
   android: true
@@ -64,6 +76,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  in_app_review_platform_interface: 2.0.5
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -79,6 +92,23 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/images/
+    - assets/images/growth/
+    - assets/sounds/
+
+  # アプリ全体のフォント。暖色・丸みのある「アザラシ」デザインに合わせ、
+  # 高齢者にも読みやすい丸ゴシック（Zen Maru Gothic）をバンドルする。
+  # 日本語・英数字・キリル文字をカバーし、未収録の言語はOS標準にフォールバックする。
+  fonts:
+    - family: ZenMaruGothic
+      fonts:
+        - asset: assets/fonts/ZenMaruGothic-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/ZenMaruGothic-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/ZenMaruGothic-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/ZenMaruGothic-Black.ttf
+          weight: 900
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

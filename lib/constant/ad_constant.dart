@@ -25,13 +25,15 @@ class AdUnitId {
   static const _testInterstitialIos = 'ca-app-pub-3940256099942544/4411468910';
 
   // ── 本番ID（release ビルドで使用）──
-  // TODO: AdMob 管理画面で発行した本番の広告ユニットIDに置換すること。
-  //       App ID は ca-app-pub-8385267635438802~1837529571（設定済み）。
-  static const _prodBannerAndroid = 'ca-app-pub-8385267635438802/0000000000';
-  static const _prodBannerIos = 'ca-app-pub-8385267635438802/0000000000';
-  static const _prodInterstitialAndroid =
-      'ca-app-pub-8385267635438802/0000000000';
+  // iOS: App ID = ca-app-pub-8385267635438802~9883058597（写真記憶 / Info.plist に設定）。
+  static const _prodBannerIos = 'ca-app-pub-8385267635438802/7962372188';
   static const _prodInterstitialIos =
+      'ca-app-pub-8385267635438802/7681390914';
+
+  // Android: 現状未対応。AdMob で Android 用アプリ／広告ユニットを作成したら置換すること。
+  // TODO: Android 本番IDに置換（App ID も AndroidManifest.xml に別途設定が必要）。
+  static const _prodBannerAndroid = 'ca-app-pub-8385267635438802/0000000000';
+  static const _prodInterstitialAndroid =
       'ca-app-pub-8385267635438802/0000000000';
 
   /// バナー広告ユニットID。非対応プラットフォームでは空文字を返す。
