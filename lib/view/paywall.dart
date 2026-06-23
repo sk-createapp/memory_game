@@ -27,41 +27,51 @@ Future<void> showPaywall(BuildContext context) {
 ///
 /// 十分に遊んだ無料ユーザーへ、インタースティシャル広告で体験が途切れる前に
 /// 「広告を消せます」と控えめに提案する。高齢者ターゲットのため、しつこく
-/// 出さないよう「最低プレイ回数・最大表示回数・最小間隔」で抑制する。
+/// 出さないよう「最低プレイ回数・最低プレイ日数・表示間隔（回を追うごとに延長）」
+/// で抑制する。
 class PaywallTrigger {
   const PaywallTrigger._();
 
   /// この回数以上遊んだユーザーにのみ提案する（アプリを気に入っている段階）。
   static const int _minPlays = 4;
 
-  /// 生涯で自動表示する最大回数（しつこさ回避）。
-  static const int _maxAutoShows = 2;
+  /// この日数以上遊んだ（=複数日にわたり使っている）ユーザーにのみ提案する。
+  /// 1日にまとめて遊んだだけの一見さんを除き、定着しはじめた人に絞る。
+  static const int _minPlayDays = 2;
 
-  /// 自動表示の最小間隔。
-  static const Duration _minInterval = Duration(days: 5);
+  /// 1回目→2回目までの最小間隔。初回提案を見送った人へ、ほどよく空けて再提案する。
+  static const Duration _secondInterval = Duration(days: 30);
+
+  /// 2回目以降の最小間隔（4ヶ月おき）。以降は無料ユーザーへ定期的に控えめに出す。
+  static const Duration _repeatInterval = Duration(days: 120);
 
   /// 条件を満たせばペイウォールを表示する。表示したら true を返す。
   ///
-  /// [totalPlays] は全期間の総プレイ回数（エンゲージメントの指標）。
+  /// [totalPlays] は全期間の総プレイ回数、[playDays] は遊んだ日数（いずれも
+  /// エンゲージメントの指標）。
   static Future<bool> maybeShowBeforeAd(
     BuildContext context,
     int totalPlays,
+    int playDays,
   ) async {
     // プレミアム・非対応プラットフォームでは出さない。
     if (!iapSupported) return false;
     if (PremiumService.instance.isPremium.value) return false;
-    // 遊び込んでいないユーザーには出さない。
+    // 遊び込んでいない（回数・日数が足りない）ユーザーには出さない。
     if (totalPlays < _minPlays) return false;
+    if (playDays < _minPlayDays) return false;
 
     final prefs = await SharedPreferences.getInstance();
 
     final count = prefs.getInt(SpKey.paywallShownCount.name) ?? 0;
-    if (count >= _maxAutoShows) return false;
 
     final lastMillis = prefs.getInt(SpKey.paywallLastShown.name);
     if (lastMillis != null) {
+      // 表示回数に応じて次に出すまでの最小間隔を変える。
+      // 2回目は30日後、3回目以降は4ヶ月おき。
+      final interval = count >= 2 ? _repeatInterval : _secondInterval;
       final last = DateTime.fromMillisecondsSinceEpoch(lastMillis);
-      if (DateTime.now().difference(last) < _minInterval) return false;
+      if (DateTime.now().difference(last) < interval) return false;
     }
 
     // 表示を記録してから出す（連続表示・二重表示を防ぐ）。

@@ -155,25 +155,56 @@ class _PremiumMenuTile extends StatelessWidget {
       valueListenable: PremiumService.instance.isPremium,
       builder: (context, isPremium, _) {
         if (isPremium) {
-          // 加入済み：操作不可のステータス表示（緑チェック）。
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
-            child: Row(
-              children: [
-                _chip(Icons.workspace_premium_rounded, DefColor.select,
-                    DefColor.textWhite),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Text(
-                    l10n.premiumActive,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppText.bodyStrong,
+          // 加入済み：タップでストアのサブスク管理（内容確認・解約）を開く。
+          return GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {
+              firePressFeedback(PressHaptic.selection);
+              Navigator.of(context).pop();
+              _openManageSubscription();
+            },
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
+              child: Row(
+                children: [
+                  _chip(Icons.workspace_premium_rounded, DefColor.select,
+                      DefColor.textWhite),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                l10n.premiumActive,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppText.bodyStrong,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            const Icon(Icons.check_circle_rounded,
+                                color: DefColor.green, size: 18),
+                          ],
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          l10n.premiumManage,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppText.recordDate
+                              .copyWith(color: DefColor.textMuted),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const Icon(Icons.check_circle_rounded,
-                    color: DefColor.green, size: 24),
-              ],
+                  const Icon(Icons.chevron_right_rounded,
+                      color: DefColor.textMuted, size: 24),
+                ],
+              ),
             ),
           );
         }
@@ -209,6 +240,16 @@ class _PremiumMenuTile extends StatelessWidget {
         );
       },
     );
+  }
+
+  /// ストアのサブスク管理（内容確認・解約）ページを外部ブラウザ／ストアで開く。
+  /// context を使わないため、ドロワーを閉じた後に安全に呼べる。
+  Future<void> _openManageSubscription() async {
+    final url = await PremiumService.instance.manageSubscriptionsUrl();
+    if (url == null) return;
+    try {
+      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+    } catch (_) {}
   }
 
   Widget _chip(IconData icon, Color bg, Color fg) => Container(

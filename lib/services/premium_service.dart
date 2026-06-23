@@ -154,6 +154,35 @@ class PremiumService {
     }
   }
 
+  /// ストアのサブスク管理（内容確認・解約）ページのURLを返す。
+  ///
+  /// RevenueCat が返す [CustomerInfo.managementURL]（その購入を直接管理できる
+  /// 正確なページ）を最優先で使い、取得できない場合は各ストアの既定の管理ページ
+  /// （iOS: App Store のサブスク一覧 / Android: Google Play のサブスク一覧）に
+  /// フォールバックする。課金非対応プラットフォームでは null。
+  Future<String?> manageSubscriptionsUrl() async {
+    if (!iapSupported) return null;
+
+    if (_configured) {
+      try {
+        final info = await Purchases.getCustomerInfo();
+        final url = info.managementURL;
+        if (url != null && url.isNotEmpty) return url;
+      } catch (_) {
+        // 取得失敗時は各ストア既定の管理ページにフォールバックする。
+      }
+    }
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+        return 'https://apps.apple.com/account/subscriptions';
+      case TargetPlatform.android:
+        return 'https://play.google.com/store/account/subscriptions';
+      default:
+        return null;
+    }
+  }
+
   /// 過去の購入を復元する（機種変更・再インストール時用）。
   Future<void> restore() async {
     if (!_configured) return;

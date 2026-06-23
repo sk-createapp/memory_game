@@ -40,7 +40,9 @@ class Premium {
   /// （リポジトリにキーを含めたくない場合は dart-define が便利）。
   static const String _appleApiKey = String.fromEnvironment(
     'REVENUECAT_APPLE_API_KEY',
-    defaultValue: '', // 例: 'appl_xxxxxxxxxxxxxxxxxxxxxxxx'
+    // RevenueCat「MemoryGame」プロジェクトの App Store 公開SDKキー。
+    // 公開キーはクライアント埋め込み前提の安全なキー（秘密鍵ではない）。
+    defaultValue: 'appl_BguxOUGyZyPsgdbJgPQRdROceNx',
   );
   static const String _googleApiKey = String.fromEnvironment(
     'REVENUECAT_GOOGLE_API_KEY',

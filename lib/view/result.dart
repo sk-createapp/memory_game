@@ -71,15 +71,18 @@ class _AnswerViewState extends ConsumerState<ResultView> {
         SoundService.instance.playResult(ResultSound.clear);
       }
 
-      // 自己ベスト更新（達成感のピーク＝最も高評価をつけたくなる瞬間）に、
-      // 条件を満たせばストアレビューを依頼する。新記録バナーや紙吹雪の余韻を
+      // クリア直後（達成感のあるタイミング・広告が出る前）に、条件を満たせば
+      // ストアレビューを依頼する。初回は新記録の瞬間に限定し、2回目以降は通常の
+      // クリアでも出す（判定は ReviewService 側）。新記録バナーや紙吹雪の余韻を
       // 味わってから出すため、少し遅らせてネイティブ依頼を呼ぶ。
-      if (newRecord) {
+      if (cleared) {
         final clearNum = ref.read(gameInfoProvider).clearNum;
+        final playDays = ref.read(activityLogProvider).activeDayCount;
         Future.delayed(const Duration(milliseconds: 1600), () {
-          ReviewService.instance.maybeRequestReviewOnAchievement(
-            isNewRecord: true,
+          ReviewService.instance.maybeRequestReviewAfterClear(
+            isNewRecord: newRecord,
             clearNum: clearNum,
+            playDays: playDays,
           );
         });
       }
@@ -281,9 +284,12 @@ class _AnswerViewState extends ConsumerState<ResultView> {
 
     // 広告でゲーム体験が途切れる前に、十分に遊んだ無料ユーザーへ
     // プレミアム（広告非表示）を控えめに提案する。出したらホームへ。
-    final totalPlays = ref.read(activityLogProvider).totalPlays;
-    final shownPaywall =
-        await PaywallTrigger.maybeShowBeforeAd(context, totalPlays);
+    final activityLog = ref.read(activityLogProvider);
+    final shownPaywall = await PaywallTrigger.maybeShowBeforeAd(
+      context,
+      activityLog.totalPlays,
+      activityLog.activeDayCount,
+    );
     if (shownPaywall) {
       goHome();
       return;

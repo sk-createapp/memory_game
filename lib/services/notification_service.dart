@@ -34,12 +34,15 @@ class NotificationService {
   // 再エンゲージ予約に使う通知IDの基点（ここから連番）。
   static const int _baseId = 1000;
 
-  // 通知を出す時刻（ローカル時間・時）。高齢者の生活リズムに合わせ日中に出す。
-  static const int _reminderHour = 10;
+  // 通知を出す時刻（ローカル時間・時）。高齢者の生活リズムに合わせ昼に出す。
+  static const int _reminderHour = 12;
 
   // しばらく起動がないときに送る「現在からの経過日数」。
-  // 最初はこまめに、その後はだんだん間隔をあけて、しつこくならないようにする。
-  static const List<int> _offsetDays = [2, 4, 7, 11, 16, 23, 30, 45, 60, 90];
+  // 最初はこまめに、その後はだんだん間隔をあけ、90日以降は90日おきに出して、
+  // しつこくしすぎず、長期離脱者にも忘れられないようにする。
+  static const List<int> _offsetDays = [
+    2, 4, 7, 11, 16, 23, 30, 45, 60, 90, 180, 270, 360,
+  ];
 
   Future<void> init() async {
     if (_initialized || !_notificationsSupported) return;

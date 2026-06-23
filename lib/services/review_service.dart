@@ -5,9 +5,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// ストアの星評価（レビュー）依頼を「最も高評価をつけたくなる瞬間」に出すサービス。
 ///
 /// ネイティブのレビュー依頼（iOS: SKStoreReviewController / Android: In-App Review API）は、
-/// 達成感のピークかつアプリを気に入っているユーザーに 1 回だけ出すのが鉄則。
-/// このアプリでは「自己ベスト更新（新記録）」が達成感の最高潮（紙吹雪・ハプティクスが
-/// 最も盛り上がる瞬間）にあたるため、そこを狙って依頼する。
+/// 達成感のピークかつアプリを気に入っているユーザーに出すのが鉄則。
+/// このアプリでは初回を「自己ベスト更新（新記録）」という達成感の最高潮（紙吹雪・
+/// ハプティクスが最も盛り上がる瞬間）に出し、2回目以降は通常のクリア直後でも出す。
+/// いずれも結果画面に入った直後（＝広告が出る前）に呼び、広告直後の不快なタイミングを避ける。
 ///
 /// Apple / Google のガイドライン上、ネイティブ依頼を独自の「好き？」プリダイアログで
 /// フィルタするのは非推奨のため、条件を満たしたらそのままネイティブ依頼を呼ぶ。
@@ -23,24 +24,30 @@ class ReviewService {
   // 何度か遊び込んで（＝アプリを気に入って）いる段階に限定する。
   static const int _minClearNum = 5;
 
+  // レビュー依頼を出してよいと判断する最小のプレイ日数（複数日使っている人に限定）。
+  static const int _minPlayDays = 3;
+
   // 同じ端末へ繰り返し出してうるさく感じさせないための最小間隔。
   static const Duration _minInterval = Duration(days: 90);
 
   // 生涯で依頼する最大回数（OS 側も年内の表示回数を制限するため控えめに）。
   static const int _maxRequests = 3;
 
-  /// 達成感のピーク（新記録）に到達したとき、条件を満たせばレビュー依頼を出す。
+  /// クリア直後（達成感のあるタイミング・広告が出る前）に、条件を満たせばレビュー
+  /// 依頼を出す。初回は達成感が最高潮の「自己ベスト更新（新記録）」の瞬間に限定し、
+  /// 2回目以降は通常のクリアでもよい（その頃にはアプリへの評価が定まっている）。
   ///
-  /// [isNewRecord] 今回が自己ベスト更新か。false なら何もしない。
+  /// [isNewRecord] 今回が自己ベスト更新か（初回依頼の判定に使う）。
   /// [clearNum]    全期間の累計クリア回数（遊び込み度の指標）。
-  Future<void> maybeRequestReviewOnAchievement({
+  /// [playDays]    遊んだ日数（複数日使っているかの指標）。
+  Future<void> maybeRequestReviewAfterClear({
     required bool isNewRecord,
     required int clearNum,
+    required int playDays,
   }) async {
-    // 達成感のピークでなければ出さない。
-    if (!isNewRecord) return;
     // 遊び込んでいない（=評価が定まっていない）ユーザーには出さない。
     if (clearNum < _minClearNum) return;
+    if (playDays < _minPlayDays) return;
 
     // 端末がレビュー依頼に対応していない（web・一部環境）なら何もしない。
     if (!await _inAppReview.isAvailable()) return;
@@ -50,6 +57,9 @@ class ReviewService {
     // 生涯の依頼回数上限を超えていたら出さない。
     final count = prefs.getInt(SpKey.reviewRequestCount.name) ?? 0;
     if (count >= _maxRequests) return;
+
+    // 初回は達成感のピーク（新記録）でのみ出す。2回目以降は通常クリアでもよい。
+    if (count == 0 && !isNewRecord) return;
 
     // 直近に出していたら（クールダウン中なら）出さない。
     final lastMillis = prefs.getInt(SpKey.reviewLastRequested.name);
