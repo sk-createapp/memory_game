@@ -27,7 +27,10 @@ class _MemorizeViewState extends ConsumerState<MemorizeView> {
   bool _isHidden = false;
   Timer? _timer;
   final DateTime _startTime = DateTime.now();
-  Duration _time = const Duration();
+  // タイマー表示だけを更新するための通知。ページ全体のsetState()を避け、
+  // アイテムテーブル（SVGタイル）の毎フレーム再構築を防ぐ。
+  final ValueNotifier<Duration> _timeNotifier =
+      ValueNotifier<Duration>(const Duration());
 
   @override
   void initState() {
@@ -35,10 +38,9 @@ class _MemorizeViewState extends ConsumerState<MemorizeView> {
     SoundService.instance.suppressTaps = true;
     _timer = Timer.periodic(const Duration(milliseconds: 10), // 10ms毎に定期実行
         (Timer timer) {
-      setState(() {
-        // 変更を画面に反映するため、setState()している
-        _time = DateTime.now().difference(_startTime);
-      });
+      // タイマー表示だけを更新する（setState()しない）ことで、
+      // テーブルなどの再構築を避ける。
+      _timeNotifier.value = DateTime.now().difference(_startTime);
     });
     super.initState();
   }
@@ -48,6 +50,7 @@ class _MemorizeViewState extends ConsumerState<MemorizeView> {
     // プレイ画面を離れたら操作音の抑制を解除する。
     SoundService.instance.suppressTaps = false;
     _timer?.cancel();
+    _timeNotifier.dispose();
     super.dispose();
   }
 
@@ -76,14 +79,21 @@ class _MemorizeViewState extends ConsumerState<MemorizeView> {
 
               return Column(
                 children: [
-                  GameTopBar(
-                    level: gameLevel,
-                    trailingIcon: Icons.timer_outlined,
-                    trailingText: getFormattedTime(_time),
-                    onHomePressed: () {
-                      if (_timer != null) {
-                        _timer!.cancel();
-                      }
+                  // タイマー表示の更新だけを_timeNotifierに購読させ、
+                  // ティック毎の再構築をGameTopBarに限定する。
+                  ValueListenableBuilder<Duration>(
+                    valueListenable: _timeNotifier,
+                    builder: (context, time, _) {
+                      return GameTopBar(
+                        level: gameLevel,
+                        trailingIcon: Icons.timer_outlined,
+                        trailingText: getFormattedTime(time),
+                        onHomePressed: () {
+                          if (_timer != null) {
+                            _timer!.cancel();
+                          }
+                        },
+                      );
                     },
                   ),
                   //メッセージ
@@ -145,7 +155,8 @@ class _MemorizeViewState extends ConsumerState<MemorizeView> {
                                         ref
                                             .read(
                                                 itemTableInfoProvider.notifier)
-                                            .setMemorizeTime(_time);
+                                            .setMemorizeTime(
+                                                _timeNotifier.value);
                                         List<String> iconChoices =
                                             getItemChoices(
                                                 36,

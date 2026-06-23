@@ -142,9 +142,8 @@ class NotificationService {
 
   /// 現在から [days] 日後の [_reminderHour] 時（ローカル）の時刻。
   tz.TZDateTime _instantAfterDays(int days) {
-    final now = tz.TZDateTime.now(tz.local);
-    final base =
-        tz.TZDateTime(tz.local, now.year, now.month, now.day, _reminderHour);
-    return base.add(Duration(days: days));
+    final target = tz.TZDateTime.now(tz.local).add(Duration(days: days));
+    return tz.TZDateTime(
+        tz.local, target.year, target.month, target.day, _reminderHour);
   }
 }

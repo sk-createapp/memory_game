@@ -30,17 +30,17 @@ class AdUnitId {
   static const _prodInterstitialIos =
       'ca-app-pub-8385267635438802/7681390914';
 
-  // Android: 現状未対応。AdMob で Android 用アプリ／広告ユニットを作成したら置換すること。
-  // TODO: Android 本番IDに置換（App ID も AndroidManifest.xml に別途設定が必要）。
-  static const _prodBannerAndroid = 'ca-app-pub-8385267635438802/0000000000';
-  static const _prodInterstitialAndroid =
-      'ca-app-pub-8385267635438802/0000000000';
+  // Android: 本番広告ユニット未作成。AdMob で Android 用アプリ／広告ユニットを
+  // 作成したら、下記 getter の release 分岐に本番IDを設定すること。
+  // それまでは release で空文字を返し、admob.dart 側のガードでロードをスキップする
+  // （プレースホルダIDを叩いて無効リクエスト／No-Fill を起こさないため）。
 
   /// バナー広告ユニットID。非対応プラットフォームでは空文字を返す。
   static String get banner {
     if (!adsSupported) return '';
     if (Platform.isAndroid) {
-      return kDebugMode ? _testBannerAndroid : _prodBannerAndroid;
+      // TODO: Android 本番バナーIDを作成したら release 側に設定する。
+      return kDebugMode ? _testBannerAndroid : '';
     }
     return kDebugMode ? _testBannerIos : _prodBannerIos;
   }
@@ -49,7 +49,8 @@ class AdUnitId {
   static String get interstitial {
     if (!adsSupported) return '';
     if (Platform.isAndroid) {
-      return kDebugMode ? _testInterstitialAndroid : _prodInterstitialAndroid;
+      // TODO: Android 本番インタースティシャルIDを作成したら release 側に設定する。
+      return kDebugMode ? _testInterstitialAndroid : '';
     }
     return kDebugMode ? _testInterstitialIos : _prodInterstitialIos;
   }

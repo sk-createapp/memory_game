@@ -38,6 +38,17 @@ class _AdmobBannerWidgetState extends State<AdmobBannerWidget> {
   AdSize? _adSize;
   bool _loadStarted = false;
 
+  // ── ロード失敗時のリトライ制御 ──
+  /// リトライ回数の上限（これを超えたら領域を畳んで諦める）。
+  static const int _maxRetries = 3;
+
+  /// リトライまでの待機時間。
+  static const Duration _retryDelay = Duration(seconds: 5);
+
+  int _retryCount = 0;
+  bool _loadFailed = false;
+  Timer? _retryTimer;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -79,6 +90,21 @@ class _AdmobBannerWidgetState extends State<AdmobBannerWidget> {
         },
         onAdFailedToLoad: (ad, error) {
           ad.dispose();
+          if (!mounted) return;
+          _bannerAd = null;
+          // 一時的な失敗（在庫なし・起動直後の通信瞬断など）に備えて、
+          // 上限付きで一定時間後に再ロードする。
+          if (_retryCount < _maxRetries) {
+            _retryCount++;
+            _retryTimer?.cancel();
+            _retryTimer = Timer(_retryDelay, () {
+              if (!mounted) return;
+              _loadAd();
+            });
+          } else {
+            // 上限到達。空の予約領域を残さないよう畳む。
+            setState(() => _loadFailed = true);
+          }
         },
       ),
     );
@@ -88,6 +114,7 @@ class _AdmobBannerWidgetState extends State<AdmobBannerWidget> {
 
   @override
   void dispose() {
+    _retryTimer?.cancel();
     _bannerAd?.dispose();
     super.dispose();
   }
@@ -99,6 +126,12 @@ class _AdmobBannerWidgetState extends State<AdmobBannerWidget> {
       valueListenable: PremiumService.instance.isPremium,
       builder: (context, isPremium, _) {
         if (isPremium) return const SizedBox.shrink();
+        // リトライ上限まで失敗したら、空の予約領域を残さず畳む。
+        // 広告ユニットID未設定（Android release 未作成・非対応プラットフォーム）でも、
+        // ロード自体が始まらず畳むパスに乗らないため、ここで空の予約領域を残さない。
+        if (_loadFailed || AdUnitId.banner.isEmpty) {
+          return const SizedBox.shrink();
+        }
         // 読み込み中は同サイズの領域を確保してレイアウトのガタつきを防ぐ。
         if (!_isLoaded || _bannerAd == null) {
           return SizedBox(
