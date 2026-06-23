@@ -17,9 +17,9 @@ class ActivityLogNotifier extends StateNotifier<ActivityLog> {
   }
 
   /// 1プレイぶんの活動を今日の記録に追加する。
-  /// [clearedLevel] はクリアしたレベル番号（1始まり）。未クリアなら null。
-  void recordPlay({int? clearedLevel}) {
-    state = state.recordPlay(DateTime.now(), clearedLevel: clearedLevel);
+  /// [cleared] はそのプレイをクリアしたか（レベルを問わない）。
+  void recordPlay({bool cleared = false}) {
+    state = state.recordPlay(DateTime.now(), cleared: cleared);
     ActivityLog.save(state);
   }
 }

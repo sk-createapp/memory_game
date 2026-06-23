@@ -49,16 +49,13 @@ class _AnswerViewState extends ConsumerState<ResultView> {
   void initState() {
     super.initState();
     // 結果画面の表示はゲーム1回ぶんの完了に相当する。
-    // 継続記録へ「今日のプレイ」を1回ぶん記録する（クリア時はそのレベル番号を加算）。
+    // 継続記録へ「今日のプレイ」を1回ぶん記録する（クリア時はクリア回数を加算）。
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final itemTableInfo = ref.read(itemTableInfoProvider);
-      final gameLevel = ref.read(gameLevelProvider);
       final cleared =
           isAllCorrect(itemTableInfo.tableItems, itemTableInfo.answerItemNum);
-      ref
-          .read(activityLogProvider.notifier)
-          .recordPlay(clearedLevel: cleared ? gameLevel + 1 : null);
+      ref.read(activityLogProvider.notifier).recordPlay(cleared: cleared);
 
       final newRecord = cleared && widget.isNewRecord;
 

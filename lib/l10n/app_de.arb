@@ -51,6 +51,8 @@
 "premiumSubscribe": "Premium holen",
 "premiumRestore": "Kauf wiederherstellen",
 "premiumRestoreChecking": "Käufe werden geprüft…",
+"premiumRestoreNone": "Es wurden keine Käufe zum Wiederherstellen gefunden.",
+"premiumPending": "Genehmigung angefordert. Die Werbung verschwindet automatisch, sobald sie genehmigt ist.",
 "premiumNotNow": "Später",
 "premiumThanks": "Vielen Dank! Die Werbung wurde entfernt.",
 "premiumLegal": "Dieses Abo verlängert sich automatisch. Du kannst es jederzeit in den Store-Einstellungen kündigen. Mit dem Kauf stimmst du den Nutzungsbedingungen und der Datenschutzerklärung zu.",

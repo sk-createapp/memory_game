@@ -56,6 +56,8 @@
 "premiumSubscribe": "Go Premium",
 "premiumRestore": "Restore purchase",
 "premiumRestoreChecking": "Checking your purchases…",
+"premiumRestoreNone": "No purchases were found to restore.",
+"premiumPending": "Approval requested. Ads will disappear automatically once it's approved.",
 "premiumNotNow": "Not now",
 "premiumThanks": "Thank you! Ads have been removed.",
 "premiumLegal": "This subscription renews automatically. You can cancel anytime in your store settings. By purchasing, you agree to the Terms of Service and Privacy Policy.",

@@ -9,6 +9,16 @@ final levelInfosProvider =
   return LevelInfoNotifier();
 });
 
+/// 当セッションで直近にクリアして追加した記録と、そのレベル。
+///
+/// ホームの「前回の記録」バッジは本来「最新の記録」を指すが、追加した記録が
+/// ランキング（[DefNum.recordNum] 件）から溢れて消えた場合、最新日時で選ぶと
+/// 古い記録を誤って強調してしまう。これを避けるため、実際に追加した記録の
+/// インスタンスを保持し、ホーム側で同一性により突き合わせる。アプリ再起動で
+/// null に戻り、その場合は従来どおり最新日時で判定する。
+final lastPlayedRecordProvider =
+    StateProvider<({int level, RecordInfo record})?>((ref) => null);
+
 class LevelInfoNotifier extends StateNotifier<List<LevelInfo>> {
   LevelInfoNotifier()
       : super([

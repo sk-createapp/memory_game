@@ -12,8 +12,8 @@ import 'package:memory_game/view/util/widget.dart';
 /// 記録画面。
 ///
 /// 連続日数・累計を上部に示し、月カレンダーで「やった日」を埋める。
-/// 各日のマスは、その日にクリアしたレベル番号の合計でヒートマップのように
-/// 濃淡をつけ、合計値も数字で表示する。
+/// 各日のマスは、その日のクリア回数（レベルを問わない）でヒートマップのように
+/// 濃淡をつけ、回数も数字で表示する。
 class RecordView extends ConsumerStatefulWidget {
   const RecordView({super.key});
 
@@ -44,7 +44,7 @@ class _RecordViewState extends ConsumerState<RecordView> {
     final today = DateTime(now.year, now.month, now.day);
 
     final streak = log.currentStreak(now);
-    final total = log.totalClearedLevelSum;
+    final total = log.totalClears;
     final activeDays = log.activeDayCount;
 
     // 翌月（未来）へは進めないようにする。
@@ -293,7 +293,7 @@ class _RecordViewState extends ConsumerState<RecordView> {
     final activity = log.dayOf(date);
     final isToday = date == today;
     final fill = _cellColor(activity);
-    final onDark = activity.plays > 0 && activity.clearedLevelSum >= 16;
+    final onDark = activity.plays > 0 && activity.clears >= 6;
     final dateColor = onDark ? DefColor.textWhite : DefColor.textMuted;
 
     return Container(
@@ -320,13 +320,13 @@ class _RecordViewState extends ConsumerState<RecordView> {
               ),
             ),
           ),
-          // クリアレベル合計（中央に大きめ）。0 の日は数字を出さない。
-          if (activity.clearedLevelSum > 0)
+          // クリア回数（中央に大きめ）。0 の日は数字を出さない。
+          if (activity.clears > 0)
             Center(
               child: Padding(
                 padding: const EdgeInsets.only(top: 6),
                 child: Text(
-                  '${activity.clearedLevelSum}',
+                  '${activity.clears}',
                   style: TextStyle(
                     color: onDark ? DefColor.textWhite : DefColor.textBlack,
                     fontSize: 17,
@@ -341,17 +341,17 @@ class _RecordViewState extends ConsumerState<RecordView> {
     );
   }
 
-  // 「クリアしたレベルの合計」に応じたヒートマップ色。
-  // やってない日→塗りなし（枠線だけ）、プレイのみ（合計0）→淡色、合計が大きいほど濃く。
+  // 「クリア回数」に応じたヒートマップ色。
+  // やってない日→塗りなし（枠線だけ）、プレイのみ（クリア0）→淡色、回数が多いほど濃く。
   Color _cellColor(DayActivity activity) {
     if (activity.plays == 0) return DefColor.none;
-    if (activity.clearedLevelSum == 0) return DefColor.orangeSoft;
-    final s = activity.clearedLevelSum;
-    final t = s >= 31
+    if (activity.clears == 0) return DefColor.orangeSoft;
+    final c = activity.clears;
+    final t = c >= 10
         ? 1.0
-        : s >= 16
+        : c >= 6
             ? 0.75
-            : s >= 6
+            : c >= 3
                 ? 0.5
                 : 0.28;
     return Color.lerp(DefColor.orangeSoft, DefColor.orangeDeep, t)!;

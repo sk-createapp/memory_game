@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:memory_game/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -144,15 +145,22 @@ class _AnswerViewState extends ConsumerState<AnswerView> {
                                               bestTime;
 
                                       //記録追加と同時に育成EXPを加算し、結果を受け取る。
+                                      final playedRecord = RecordInfo(
+                                          memorizeTime:
+                                              itemTableInfo.memorizeTime!,
+                                          recordedDate: DateTime.now());
                                       growthGain = ref
                                           .read(levelInfosProvider.notifier)
-                                          .addRecord(
-                                              gameLevel,
-                                              RecordInfo(
-                                                  memorizeTime: itemTableInfo
-                                                      .memorizeTime!,
-                                                  recordedDate:
-                                                      DateTime.now()));
+                                          .addRecord(gameLevel, playedRecord);
+                                      //「前回の記録」バッジ用に直近プレイを記録する
+                                      //（ランキングから溢れた場合の誤強調を防ぐ）。
+                                      ref
+                                          .read(lastPlayedRecordProvider
+                                              .notifier)
+                                          .state = (
+                                        level: gameLevel,
+                                        record: playedRecord,
+                                      );
 
                                       //ゲームインフォのクリア回数をインクリメントしてSP/Provider更新
                                       ref
@@ -222,8 +230,12 @@ class _AnswerViewState extends ConsumerState<AnswerView> {
         });
       },
       getItemHeights: (itemHeights) {
-        ref.read(answerItemHeightsProvider.notifier).state =
-            List.of(itemHeights);
+        //高さが変わっていなければ再代入しない（同値の新リストでも通知され、
+        //毎フレーム再ビルド→再計測のループになるのを防ぐ）。
+        final notifier = ref.read(answerItemHeightsProvider.notifier);
+        if (!listEquals(notifier.state, itemHeights)) {
+          notifier.state = List.of(itemHeights);
+        }
       },
     );
   }

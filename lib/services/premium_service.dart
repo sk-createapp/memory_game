@@ -1,23 +1,41 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:flutter/services.dart';
 import 'package:memory_game/constant/premium_constant.dart';
 import 'package:memory_game/constant/sp_key.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+/// 月額プレミアム購入フローの結果。呼び出し側が案内表示の要否を判断するのに使う。
+enum PurchaseOutcome {
+  /// 購入が成立した（権利反映は CustomerInfo 経由で行われる）。
+  success,
+
+  /// ユーザーが購入をキャンセルした（失敗ではないため案内は出さない）。
+  cancelled,
+
+  /// 承認待ち（ファミリー共有の Ask to Buy・決済保留など）。後で CustomerInfo
+  /// リスナー経由で権利が付与される正常ケースなので、失敗案内は出さない。
+  pending,
+
+  /// 未構成・商品未取得・ストア接続不良などで購入できなかった（案内を出す）。
+  failed,
+}
 
 /// プレミアム（月額サブスクで広告非表示）の購入状態を一元管理するシングルトン。
 ///
-/// 権利（[isPremium]）は端末の SharedPreferences にキャッシュしておき、
-/// 起動直後・オフラインでも即座に判定できるようにする。あわせて起動時に
-/// [InAppPurchase.restorePurchases] を呼び、ストア側の最新状態に同期する。
+/// 権利判定は RevenueCat のエンタイトルメント [Premium.entitlementId] を唯一の
+/// 真実とする。RevenueCat はストアのレシートをサーバーで検証し、解約・期限切れに
+/// なれば該当エンタイトルメントが自動的に非アクティブになるため、端末側だけで
+/// 「失効」を正しく反映できる（旧 in_app_purchase 実装の弱点を解消）。
+///
+/// 起動直後・オフラインでも判定できるよう、最後に確定した権利は
+/// SharedPreferences にキャッシュし、起動時に即時反映する。確定した最新状態は
+/// RevenueCat（[CustomerInfo]）から取得して上書きする。
 ///
 /// 状態は [ValueNotifier] で公開し、広告ウィジェット（[isPremium] を購読して
 /// 非表示化）やホーム／メニューの導線（[ValueListenableBuilder]）から監視する。
-///
-/// 注意: サーバーでのレシート検証は行わない簡易構成のため、解約後の失効を
-/// 端末だけでは厳密に検知できない（購入・復元の成功をもって有効とみなす）。
-/// 厳密な失効管理が必要になったらサーバー検証を追加すること。
 class PremiumService {
   PremiumService._();
   static final PremiumService instance = PremiumService._();
@@ -25,22 +43,24 @@ class PremiumService {
   /// プレミアム権利を保持しているか。広告の表示可否はこれを唯一の真実とする。
   final ValueNotifier<bool> isPremium = ValueNotifier<bool>(false);
 
-  /// 月額プレミアム商品の詳細（価格表示などに使う）。未取得時は null。
-  final ValueNotifier<ProductDetails?> monthlyProduct =
-      ValueNotifier<ProductDetails?>(null);
+  /// 月額プレミアムのパッケージ（価格表示・購入に使う）。未取得時は null。
+  final ValueNotifier<Package?> monthlyPackage = ValueNotifier<Package?>(null);
 
   /// 購入処理が進行中か（ボタンのローディング表示に使う）。
   final ValueNotifier<bool> purchasePending = ValueNotifier<bool>(false);
 
-  final InAppPurchase _iap = InAppPurchase.instance;
-  StreamSubscription<List<PurchaseDetails>>? _subscription;
   bool _initialized = false;
 
-  /// ストアから取得できた価格（ローカライズ済み）。未取得時はフォールバック。
-  String get priceText => monthlyProduct.value?.price ?? Premium.fallbackPrice;
+  /// RevenueCat の構成（APIキー設定 & configure）に成功したか。
+  /// 失敗時はキャッシュ権利のみで動作し、購入・復元は行わない。
+  bool _configured = false;
 
-  /// 起動時に一度だけ呼ぶ。キャッシュ済み権利の反映 → 購入監視 → 商品取得 →
-  /// 購入復元、の順で初期化する。
+  /// ストアから取得できた価格（ローカライズ済み）。未取得時はフォールバック。
+  String get priceText =>
+      monthlyPackage.value?.storeProduct.priceString ?? Premium.fallbackPrice;
+
+  /// 起動時に一度だけ呼ぶ。キャッシュ済み権利の反映 → RevenueCat 構成 →
+  /// 権利監視 → 最新権利の取得 → オファリング取得、の順で初期化する。
   Future<void> init() async {
     if (_initialized) return;
     _initialized = true;
@@ -51,38 +71,44 @@ class PremiumService {
 
     if (!iapSupported) return;
 
-    bool available;
+    // 2. API キー未設定なら課金機能を無効化（クラッシュ回避）。キャッシュ権利で継続。
+    final apiKey = Premium.revenueCatApiKey;
+    if (apiKey.isEmpty) return;
+
     try {
-      available = await _iap.isAvailable();
+      await Purchases.setLogLevel(kDebugMode ? LogLevel.debug : LogLevel.warn);
+      await Purchases.configure(PurchasesConfiguration(apiKey));
+      _configured = true;
     } catch (_) {
-      available = false;
+      return; // 構成に失敗してもキャッシュ権利で動作を継続する。
     }
-    if (!available) return;
 
-    // 2. 購入更新の監視を開始（購入・復元・保留・エラーが流れてくる）。
-    _subscription = _iap.purchaseStream.listen(
-      _onPurchaseUpdated,
-      onDone: () => _subscription?.cancel(),
-      onError: (_) {},
-    );
+    // 3. 権利更新の監視を開始（購入・復元・解約・失効がすべてここに反映される）。
+    Purchases.addCustomerInfoUpdateListener(_onCustomerInfo);
 
-    // 3. 商品情報を取得（価格表示・購入に必要）。
-    await _loadProducts();
-
-    // 4. 起動時に購入を復元し、サブスクの有効状態を最新化する。
-    //    （有効な購入があれば purchaseStream 経由で restored が流れてくる）
+    // 4. 最新の権利状態を取得して同期（解約・期限切れもサーバー基準で反映）。
+    //    オフライン時は RevenueCat の端末キャッシュが返るため失敗しにくい。
     try {
-      await _iap.restorePurchases();
-    } catch (_) {}
+      final info = await Purchases.getCustomerInfo();
+      await _applyCustomerInfo(info);
+    } catch (_) {
+      // 取得失敗時はキャッシュ済みの権利を維持する（プレミアムを誤って失わない）。
+    }
+
+    // 5. オファリング（価格表示・購入に使う）を取得。
+    await _loadOfferings();
   }
 
-  Future<void> _loadProducts() async {
+  Future<void> _loadOfferings() async {
     try {
-      final response =
-          await _iap.queryProductDetails({Premium.monthlyProductId});
-      if (response.productDetails.isNotEmpty) {
-        monthlyProduct.value = response.productDetails.first;
-      }
+      final offerings = await Purchases.getOfferings();
+      final current = offerings.current;
+      if (current == null) return;
+      // 月額スロットを優先し、無ければ Offering の先頭パッケージで代替する。
+      monthlyPackage.value = current.monthly ??
+          (current.availablePackages.isNotEmpty
+              ? current.availablePackages.first
+              : null);
     } catch (_) {
       // 取得失敗時はフォールバック価格で表示し、購入時に再取得を試みる。
     }
@@ -90,64 +116,65 @@ class PremiumService {
 
   /// 月額プレミアムの購入フローを開始する。
   ///
-  /// 実際の購入結果は [purchaseStream] 経由で [_onPurchaseUpdated] に届く。
-  Future<void> buyMonthly() async {
-    if (!iapSupported) return;
-    if (monthlyProduct.value == null) {
-      await _loadProducts();
+  /// 結果を [PurchaseOutcome] で返す。未構成・商品未取得・ストア接続不良などで
+  /// 購入できなかった場合は [PurchaseOutcome.failed]、ユーザーがキャンセルした
+  /// 場合は [PurchaseOutcome.cancelled]、成立した場合は [PurchaseOutcome.success]。
+  /// 呼び出し側は failed のときだけ「利用できません」案内を出す。
+  Future<PurchaseOutcome> buyMonthly() async {
+    if (!_configured) return PurchaseOutcome.failed;
+    var package = monthlyPackage.value;
+    if (package == null) {
+      await _loadOfferings();
+      package = monthlyPackage.value;
     }
-    final product = monthlyProduct.value;
-    if (product == null) return;
+    if (package == null) return PurchaseOutcome.failed;
 
     purchasePending.value = true;
     try {
-      // 自動更新サブスクは in_app_purchase 上では「非消費型」として購入する。
-      await _iap.buyNonConsumable(
-        purchaseParam: PurchaseParam(productDetails: product),
-      );
+      final result = await Purchases.purchase(PurchaseParams.package(package));
+      await _applyCustomerInfo(result.customerInfo);
+      return PurchaseOutcome.success;
+    } on PlatformException catch (e) {
+      // 進行中フラグを戻す（権利はまだ付与しない）。キャンセル・承認待ちは失敗では
+      // ないため案内を出さないよう、エラーコードで区別する。
+      purchasePending.value = false;
+      final code = PurchasesErrorHelper.getErrorCode(e);
+      switch (code) {
+        case PurchasesErrorCode.purchaseCancelledError:
+          return PurchaseOutcome.cancelled;
+        case PurchasesErrorCode.paymentPendingError:
+          // 承認待ち（Ask to Buy / 決済保留）。承認後にリスナー経由で権利が付く。
+          return PurchaseOutcome.pending;
+        default:
+          return PurchaseOutcome.failed;
+      }
     } catch (_) {
       purchasePending.value = false;
+      return PurchaseOutcome.failed;
     }
   }
 
   /// 過去の購入を復元する（機種変更・再インストール時用）。
   Future<void> restore() async {
-    if (!iapSupported) return;
+    if (!_configured) return;
     try {
-      await _iap.restorePurchases();
+      final info = await Purchases.restorePurchases();
+      await _applyCustomerInfo(info);
     } catch (_) {}
   }
 
-  Future<void> _onPurchaseUpdated(List<PurchaseDetails> purchases) async {
-    for (final purchase in purchases) {
-      if (purchase.productID != Premium.monthlyProductId) {
-        // 対象外の購入も保留があれば必ず完了させる（ストア要件）。
-        if (purchase.pendingCompletePurchase) {
-          await _iap.completePurchase(purchase);
-        }
-        continue;
-      }
+  void _onCustomerInfo(CustomerInfo info) {
+    // リスナーは同期シグネチャのため、結果を待たずに反映する。
+    _applyCustomerInfo(info);
+  }
 
-      switch (purchase.status) {
-        case PurchaseStatus.pending:
-          purchasePending.value = true;
-          break;
-        case PurchaseStatus.purchased:
-        case PurchaseStatus.restored:
-          await _setPremium(true);
-          purchasePending.value = false;
-          break;
-        case PurchaseStatus.error:
-        case PurchaseStatus.canceled:
-          purchasePending.value = false;
-          break;
-      }
-
-      // 保留中の購入は必ず完了させないと、再配信され続ける。
-      if (purchase.pendingCompletePurchase) {
-        await _iap.completePurchase(purchase);
-      }
-    }
+  /// サーバー基準の権利状態を端末へ反映する。
+  /// [Premium.entitlementId] が active ならプレミアム有効。解約・期限切れ後は
+  /// active から外れるため、自動的に無効へ戻る。
+  Future<void> _applyCustomerInfo(CustomerInfo info) async {
+    final active = info.entitlements.active.containsKey(Premium.entitlementId);
+    purchasePending.value = false;
+    await _setPremium(active);
   }
 
   Future<void> _setPremium(bool value) async {

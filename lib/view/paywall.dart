@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:memory_game/constant/app_links.dart';
 import 'package:memory_game/constant/color_constant.dart';
 import 'package:memory_game/constant/premium_constant.dart';
@@ -117,12 +117,15 @@ class _PaywallViewState extends State<PaywallView> {
 
   Future<void> _subscribe() async {
     final l10n = AppLocalizations.of(context)!;
-    await PremiumService.instance.buyMonthly();
-    // 商品が取得できない等で購入フローに入れなかった場合の案内。
+    // buyMonthly() は購入フローの結果を返す。商品が取得できない、またはストア接続
+    // 不良などで購入できなかった場合のみ案内を出す（ユーザーのキャンセルは出さない）。
+    final outcome = await PremiumService.instance.buyMonthly();
     if (!mounted) return;
-    if (PremiumService.instance.monthlyProduct.value == null &&
-        !PremiumService.instance.purchasePending.value) {
+    if (outcome == PurchaseOutcome.failed) {
       _messenger?.showSnackBar(SnackBar(content: Text(l10n.premiumUnavailable)));
+    } else if (outcome == PurchaseOutcome.pending) {
+      // 承認待ち（Ask to Buy 等）。失敗ではないので安心できる案内を出す。
+      _messenger?.showSnackBar(SnackBar(content: Text(l10n.premiumPending)));
     }
   }
 
@@ -130,7 +133,15 @@ class _PaywallViewState extends State<PaywallView> {
     final l10n = AppLocalizations.of(context)!;
     _messenger?.showSnackBar(
         SnackBar(content: Text(l10n.premiumRestoreChecking)));
+    // 復元は restorePurchases() の戻り値 CustomerInfo で即時に権利を判定する。
+    // 復元対象が無ければ isPremium は変化しないため、復元前後の値を比較し、
+    // 変化が無ければ premiumRestoreNone を出す（高齢者ターゲットの混乱を防ぐ）。
+    final wasPremium = PremiumService.instance.isPremium.value;
     await PremiumService.instance.restore();
+    if (!mounted) return;
+    if (!wasPremium && !PremiumService.instance.isPremium.value) {
+      _messenger?.showSnackBar(SnackBar(content: Text(l10n.premiumRestoreNone)));
+    }
   }
 
   Future<void> _openUrl(String url) async {
@@ -201,12 +212,12 @@ class _PaywallViewState extends State<PaywallView> {
                   _BenefitRow(text: l10n.premiumBenefitSupport),
                   SizedBox(height: context.sectionGap),
                   // 価格表示（ストアから取得できればローカライズ価格）。
-                  ValueListenableBuilder<ProductDetails?>(
-                    valueListenable: PremiumService.instance.monthlyProduct,
-                    builder: (context, product, _) {
+                  ValueListenableBuilder<Package?>(
+                    valueListenable: PremiumService.instance.monthlyPackage,
+                    builder: (context, package, _) {
                       return Text(
-                        l10n.premiumPrice(
-                            product?.price ?? PremiumService.instance.priceText),
+                        l10n.premiumPrice(package?.storeProduct.priceString ??
+                            PremiumService.instance.priceText),
                         textAlign: TextAlign.center,
                         style: AppText.subheading.copyWith(fontSize: 22),
                       );

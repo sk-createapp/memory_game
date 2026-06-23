@@ -6,28 +6,30 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// 1日ぶんの活動量。
 ///
 /// [plays] はその日に遊んだ回数（クリア有無を問わない＝「やった日」の判定に使う）。
-/// [clearedLevelSum] はその日にクリアしたレベル番号の合計
-/// （例: レベル3とレベル5をクリアすると 3+5=8）。カレンダーのヒートマップ濃淡と
-/// 表示数値に使う。
+/// [clears] はその日にクリアした回数（レベルを問わない。例: 2回クリアすると 2）。
+/// カレンダーのヒートマップ濃淡と表示数値に使う。
 class DayActivity {
   final int plays;
-  final int clearedLevelSum;
+  final int clears;
 
-  const DayActivity({this.plays = 0, this.clearedLevelSum = 0});
+  const DayActivity({this.plays = 0, this.clears = 0});
 
-  DayActivity copyWith({int? plays, int? clearedLevelSum}) => DayActivity(
+  DayActivity copyWith({int? plays, int? clears}) => DayActivity(
         plays: plays ?? this.plays,
-        clearedLevelSum: clearedLevelSum ?? this.clearedLevelSum,
+        clears: clears ?? this.clears,
       );
 
   Map<String, dynamic> toJson() => {
         'plays': plays,
-        'clearedLevelSum': clearedLevelSum,
+        'clears': clears,
       };
 
   static DayActivity fromJson(Map<String, dynamic> json) => DayActivity(
         plays: (json['plays'] as num?)?.toInt() ?? 0,
-        clearedLevelSum: (json['clearedLevelSum'] as num?)?.toInt() ?? 0,
+        // 旧データ（クリアしたレベル番号の合計 clearedLevelSum 方式）からの移行：
+        // 正確な回数は復元できないため、クリア実績があった日は最低1回ぶんとして引き継ぐ。
+        clears: (json['clears'] as num?)?.toInt() ??
+            (((json['clearedLevelSum'] as num?)?.toInt() ?? 0) > 0 ? 1 : 0),
       );
 }
 
@@ -54,9 +56,9 @@ class ActivityLog {
   /// その日に1回でも遊んだか（=「やった日」）。
   bool isActive(DateTime date) => (days[dateKey(date)]?.plays ?? 0) > 0;
 
-  /// 全期間のクリアレベル合計（「クリアしたレベルを加算した数」の累計）。
-  int get totalClearedLevelSum =>
-      days.values.fold(0, (sum, d) => sum + d.clearedLevelSum);
+  /// 全期間のクリア回数（レベルを問わない累計）。
+  int get totalClears =>
+      days.values.fold(0, (sum, d) => sum + d.clears);
 
   /// 遊んだ日数（のべ）。
   int get activeDayCount => days.values.where((d) => d.plays > 0).length;
@@ -83,16 +85,14 @@ class ActivityLog {
   }
 
   /// [date] に1プレイぶんの活動を加えた新しいログを返す。
-  /// [clearedLevel] はクリアしたレベル番号（1始まり）。未クリアなら null。
-  ActivityLog recordPlay(DateTime date, {int? clearedLevel}) {
+  /// [cleared] はそのプレイをクリアしたか（レベルを問わない）。
+  ActivityLog recordPlay(DateTime date, {bool cleared = false}) {
     final key = dateKey(date);
     final cur = days[key] ?? const DayActivity();
-    final add =
-        (clearedLevel != null && clearedLevel > 0) ? clearedLevel : 0;
     final nextDays = Map<String, DayActivity>.from(days)
       ..[key] = cur.copyWith(
         plays: cur.plays + 1,
-        clearedLevelSum: cur.clearedLevelSum + add,
+        clears: cur.clears + (cleared ? 1 : 0),
       );
     return ActivityLog(days: nextDays);
   }

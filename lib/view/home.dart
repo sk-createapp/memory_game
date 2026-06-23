@@ -55,15 +55,23 @@ class _HomeViewState extends ConsumerState<HomeView> {
     //表示するベストタイムを設定
     final records = levelInfos[gameLevel].recordInfos;
 
-    // 直近にクリアしたタイム（=最も新しい記録）がランキングのどの順位かを
-    // 特定し、「前回の記録」ラベルで強調表示する。
+    // 「前回の記録」ラベルを付ける順位を決める。
     int lastRecordIndex = -1;
-    DateTime? latestDate;
-    for (int i = 0; i < records.length; i++) {
-      final date = records[i].recordedDate;
-      if (latestDate == null || date.isAfter(latestDate)) {
-        latestDate = date;
-        lastRecordIndex = i;
+    final lastPlayed = ref.watch(lastPlayedRecordProvider);
+    if (lastPlayed != null && lastPlayed.level == gameLevel) {
+      // 当セッションでこのレベルをプレイした場合は、実際に追加された記録だけを
+      // 強調する。ランキングから溢れて消えていれば該当なし（-1）でバッジは出さない。
+      lastRecordIndex =
+          records.indexWhere((r) => identical(r, lastPlayed.record));
+    } else {
+      // それ以外（別レベルの閲覧・起動直後）は従来どおり最新日時の記録を強調する。
+      DateTime? latestDate;
+      for (int i = 0; i < records.length; i++) {
+        final date = records[i].recordedDate;
+        if (latestDate == null || date.isAfter(latestDate)) {
+          latestDate = date;
+          lastRecordIndex = i;
+        }
       }
     }
 
@@ -184,6 +192,9 @@ class _HomeViewState extends ConsumerState<HomeView> {
                               ],
                             ),
                             //タイトル
+                            //上のアイコン行と近すぎないよう上に余白を足し、その分を
+                            //下の余白から差し引く（合計は sectionGap のまま）。
+                            SizedBox(height: context.sectionGap / 2),
                             Text(
                               AppLocalizations.of(context)!.homeGameTitle,
                               maxLines: 2,
@@ -191,7 +202,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                               overflow: TextOverflow.ellipsis,
                               style: AppText.title,
                             ),
-                            SizedBox(height: context.sectionGap),
+                            SizedBox(height: context.sectionGap / 2),
                             //ベストタイム
                             Text(
                               "Level ${gameLevel + 1} Best Time",

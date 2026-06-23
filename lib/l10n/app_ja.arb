@@ -51,6 +51,8 @@
 "premiumSubscribe": "プレミアムにする",
 "premiumRestore": "購入を復元",
 "premiumRestoreChecking": "購入を確認しています…",
+"premiumRestoreNone": "復元できる購入が見つかりませんでした",
+"premiumPending": "承認をお願いしました。承認されると自動で広告が消えます",
 "premiumNotNow": "あとで",
 "premiumThanks": "ありがとうございます！広告が消えました",
 "premiumLegal": "このサブスクリプションは自動更新されます。解約はストアの設定からいつでもできます。ご購入で利用規約とプライバシーポリシーに同意したものとみなします。",

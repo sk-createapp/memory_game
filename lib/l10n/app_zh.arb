@@ -51,6 +51,8 @@
 "premiumSubscribe": "升级高级版",
 "premiumRestore": "恢复购买",
 "premiumRestoreChecking": "正在确认你的购买…",
+"premiumRestoreNone": "未找到可恢复的购买。",
+"premiumPending": "已请求批准。批准后广告会自动消失。",
 "premiumNotNow": "以后再说",
 "premiumThanks": "谢谢！广告已移除。",
 "premiumLegal": "此订阅会自动续期。你可以随时在商店设置中取消。购买即表示你同意服务条款和隐私政策。",

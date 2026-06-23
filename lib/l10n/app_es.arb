@@ -51,6 +51,8 @@
 "premiumSubscribe": "Hazte Premium",
 "premiumRestore": "Restaurar compra",
 "premiumRestoreChecking": "Comprobando tus compras…",
+"premiumRestoreNone": "No se encontraron compras para restaurar.",
+"premiumPending": "Aprobación solicitada. Los anuncios desaparecerán automáticamente cuando se apruebe.",
 "premiumNotNow": "Ahora no",
 "premiumThanks": "¡Gracias! Se han quitado los anuncios.",
 "premiumLegal": "Esta suscripción se renueva automáticamente. Puedes cancelarla cuando quieras en los ajustes de la tienda. Al comprar, aceptas los Términos del servicio y la Política de privacidad.",
