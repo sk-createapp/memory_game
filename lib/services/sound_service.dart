@@ -41,8 +41,8 @@ class SoundService {
 
   final Random _random = Random();
 
-  // 操作音は控えめ、結果音はしっかり。群衆音はメロディを邪魔しないよう少し下げる。
-  static const double _tapVolume = 0.9;
+  // 操作音はかなり控えめ、結果音はしっかり。群衆音はメロディを邪魔しないよう少し下げる。
+  static const double _tapVolume = 0.4;
   static const double _jingleVolume = 1.0;
   static const double _crowdVolume = 0.7;
 
@@ -87,13 +87,23 @@ class SoundService {
     }
 
     try {
-      // 効果音が利用者の音楽・ポッドキャストを止めたり小さくしたりしないよう、
-      // オーディオフォーカスを奪わず「他の音と混ぜる」設定にする。
-      // （アプリ内のオン/オフ設定を音の有無の唯一の窓口にしたいので、
-      //  iOSのサイレントスイッチには従わせない＝既定の respectSilence: false）
+      // マナーモード（サイレント）のときは効果音を鳴らさない。あわせて、
+      // 利用者の音楽・ポッドキャストは止めたり小さくしたりしない（他の音と混ぜる）。
+      // - iOS: ambient カテゴリ＝サイレントスイッチで自動消音され、かつ他アプリの
+      //   音とミックス（mixWithOthers は ambient が暗黙で有効化）。
+      // - Android: 着信音(notificationRingtone)経由＝マナーモードで消音、
+      //   オーディオフォーカスは奪わない(none)ので他アプリの音は止めない。
+      // ※ respectSilence と mixWithOthers は generic な AudioContextConfig では
+      //   併用できない（assert で弾かれる）ため、プラットフォーム別に直接組む。
       await AudioPlayer.global.setAudioContext(
-        AudioContextConfig(focus: AudioContextConfigFocus.mixWithOthers)
-            .build(),
+        AudioContext(
+          iOS: AudioContextIOS(category: AVAudioSessionCategory.ambient),
+          android: const AudioContextAndroid(
+            contentType: AndroidContentType.sonification,
+            usageType: AndroidUsageType.notificationRingtone,
+            audioFocus: AndroidAudioFocus.none,
+          ),
+        ),
       );
 
       for (var i = 0; i < _tapPoolSize; i++) {
