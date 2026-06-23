@@ -207,8 +207,8 @@ class _PaywallViewState extends State<PaywallView> {
                   ),
                   SizedBox(height: context.sectionGap),
                   // メリット一覧。
-                  _BenefitRow(text: l10n.premiumBenefitNoAds),
                   _BenefitRow(text: l10n.premiumBenefitFocus),
+                  _BenefitRow(text: l10n.premiumBenefitNoWait),
                   _BenefitRow(text: l10n.premiumBenefitSupport),
                   SizedBox(height: context.sectionGap),
                   // 価格表示（ストアから取得できればローカライズ価格）。
@@ -291,17 +291,6 @@ class _PaywallViewState extends State<PaywallView> {
                             _openUrl(AppLinks.privacyPolicy(locale)),
                       ),
                     ],
-                  ),
-                  SizedBox(height: context.sectionGap),
-                  // あとで（閉じる）。
-                  Center(
-                    child: TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: Text(
-                        l10n.premiumNotNow,
-                        style: AppText.body.copyWith(color: DefColor.textMuted),
-                      ),
-                    ),
                   ),
                 ],
               ),

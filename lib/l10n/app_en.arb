@@ -43,10 +43,10 @@
 "premiumMenuLabel": "Premium (no ads)",
 "premiumActive": "Premium member",
 "premiumTitle": "Enjoy it, ad-free",
-"premiumLead": "With the monthly plan, all ads disappear so you can focus on the game.",
-"premiumBenefitNoAds": "All ads are removed",
+"premiumLead": "This app keeps going thanks to ad revenue and the premium plan.",
 "premiumBenefitFocus": "Play focused on the illustrations",
-"premiumBenefitSupport": "Help support the app",
+"premiumBenefitNoWait": "No more waiting for ads",
+"premiumBenefitSupport": "Support the developer",
 "premiumPrice": "{price} / month",
 "@premiumPrice": {
   "placeholders": {
@@ -58,7 +58,6 @@
 "premiumRestoreChecking": "Checking your purchases…",
 "premiumRestoreNone": "No purchases were found to restore.",
 "premiumPending": "Approval requested. Ads will disappear automatically once it's approved.",
-"premiumNotNow": "Not now",
 "premiumThanks": "Thank you! Ads have been removed.",
 "premiumLegal": "This subscription renews automatically. You can cancel anytime in your store settings. By purchasing, you agree to the Terms of Service and Privacy Policy.",
 "premiumUnavailable": "Purchase is unavailable right now. Please try again later."
