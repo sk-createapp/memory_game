@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.skcreation.memory_game">
+    package="com.skcreation.memorygame">
     <!-- ローカル通知（再エンゲージ用）に必要な権限 -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
