@@ -35,4 +35,77 @@ platform :ios do
     )
     precheck(api_key: api_key, app_identifier: "com.skcreation.memorygame")
   end
+
+  desc "App Store 用に Flutter をビルド(archive→IPA)し、バイナリを ASC にアップロードのみ（審査提出・公開はしない）"
+  lane :upload_build do
+    key = app_store_connect_api_key(
+      key_id: ENV["ASC_KEY_ID"],
+      issuer_id: ENV["ASC_ISSUER_ID"],
+      key_filepath: ENV["ASC_KEY_FILEPATH"]
+    )
+    app_id = "com.skcreation.memorygame"
+
+    # build_app(gym) は CWD=fastlane/ で xcodebuild を起動するため、ASC_KEY_FILEPATH
+    # (=リポジトリルート基準の相対パス)を素直に expand すると二重解決される。
+    # CWD に依存せず実在する .p8 を選ぶ（meal-plan と同じ対策）。
+    key_name = File.basename(ENV.fetch("ASC_KEY_FILEPATH"))
+    asc_key_path = [
+      File.expand_path(ENV.fetch("ASC_KEY_FILEPATH")),
+      File.expand_path("private_keys/#{key_name}"),
+      File.expand_path("fastlane/private_keys/#{key_name}")
+    ].find { |p| File.exist?(p) }
+    UI.user_error!("ASC API key (.p8) が見つからない (CWD=#{Dir.pwd}, ASC_KEY_FILEPATH=#{ENV.fetch('ASC_KEY_FILEPATH')})") unless asc_key_path
+
+    # Dart→App.framework のコンパイルと Pods/Generated.xcconfig の生成を先に済ませる
+    # （gym の archive でも Flutter ビルドフェーズが走るが、ここで一度通しておく）。
+    # sh の CWD は曖昧なので、Fastfile の位置(fastlane/)からリポジトリルートを確定する。
+    project_root = File.expand_path("..", __dir__)
+    sh("cd #{project_root} && flutter build ios --release --no-codesign")
+
+    # archive は automatic 署名（ASC API キーで on-the-fly プロファイル生成）。
+    auth_args = [
+      "-allowProvisioningUpdates",
+      "-authenticationKeyID #{ENV.fetch('ASC_KEY_ID')}",
+      "-authenticationKeyIssuerID #{ENV.fetch('ASC_ISSUER_ID')}",
+      "-authenticationKeyPath #{asc_key_path}"
+    ].join(" ")
+
+    # export(再署名)は automatic だと Xcode の cloud signing が API キー権限で弾かれる。
+    # sigh で App Store プロファイルを取得し、manual 署名で IPA 化する。
+    sigh(
+      app_identifier: app_id,
+      platform: "ios",
+      output_path: "build/profiles"
+    )
+    profile_name = lane_context[SharedValues::SIGH_NAME]
+
+    build_app(
+      workspace: "ios/Runner.xcworkspace",
+      scheme: "Runner",
+      export_method: "app-store",
+      clean: true,
+      output_directory: "build",
+      output_name: "MemoryBlink.ipa",
+      xcargs: auth_args,
+      export_options: {
+        signingStyle: "manual",
+        signingCertificate: "Apple Distribution",
+        provisioningProfiles: {
+          app_id => profile_name
+        }
+      }
+    )
+
+    # バイナリのみ送信。メタデータ/スクショは別 lane、審査提出・自動公開はしない。
+    upload_to_app_store(
+      api_key: key,
+      app_identifier: app_id,
+      skip_metadata: true,
+      skip_screenshots: true,
+      skip_app_version_update: true,
+      run_precheck_before_submit: false,
+      submit_for_review: false,
+      automatic_release: false
+    )
+  end
 end
