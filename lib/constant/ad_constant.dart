@@ -23,12 +23,19 @@ class AdUnitId {
   static const _testInterstitialAndroid =
       'ca-app-pub-3940256099942544/1033173712';
   static const _testInterstitialIos = 'ca-app-pub-3940256099942544/4411468910';
+  static const _testAppOpenAndroid = 'ca-app-pub-3940256099942544/9257395921';
+  static const _testAppOpenIos = 'ca-app-pub-3940256099942544/5575463023';
 
   // ── 本番ID（release ビルドで使用）──
   // iOS: App ID = ca-app-pub-8385267635438802~9883058597（写真記憶 / Info.plist に設定）。
   static const _prodBannerIos = 'ca-app-pub-8385267635438802/7962372188';
   static const _prodInterstitialIos =
       'ca-app-pub-8385267635438802/7681390914';
+
+  // App Open（アプリ起動/復帰時の全画面広告）本番ID。
+  // iOS は作成済み。Android は公開予定が未定のため未作成（getter の release 分岐は
+  // 空文字を返し、admob.dart 側のガードでロード・表示をスキップする＝無効リクエスト防止）。
+  static const _prodAppOpenIos = 'ca-app-pub-8385267635438802/5191777183';
 
   // Android: 本番広告ユニット未作成。AdMob で Android 用アプリ／広告ユニットを
   // 作成したら、下記 getter の release 分岐に本番IDを設定すること。
@@ -53,5 +60,18 @@ class AdUnitId {
       return kDebugMode ? _testInterstitialAndroid : '';
     }
     return kDebugMode ? _testInterstitialIos : _prodInterstitialIos;
+  }
+
+  /// App Open（アプリ復帰時の全画面）広告ユニットID。非対応プラットフォームでは空文字を返す。
+  ///
+  /// 本番IDが未設定（空文字）のプラットフォームでは、admob.dart 側のガードで
+  /// ロード・表示をスキップする（プレースホルダIDによる無効リクエストを避ける）。
+  static String get appOpen {
+    if (!adsSupported) return '';
+    if (Platform.isAndroid) {
+      // TODO: Android 本番 App Open IDを作成したら release 側に設定する。
+      return kDebugMode ? _testAppOpenAndroid : '';
+    }
+    return kDebugMode ? _testAppOpenIos : _prodAppOpenIos;
   }
 }

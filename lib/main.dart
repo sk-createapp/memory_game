@@ -60,8 +60,9 @@ Future<void> _initMonetization() async {
   await MobileAds.instance.initialize();
   // バナー等の広告ウィジェットに「ロード開始してよい」と通知する。
   AdsBootstrap.markReady();
-  // 最初のインタースティシャルを事前読込しておく。
+  // 最初のインタースティシャル・App Open を事前読込しておく。
   InterstitialAdManager.instance.preload();
+  AppOpenAdManager.instance.preload();
 }
 
 class StartUp extends StatefulWidget {
@@ -86,13 +87,29 @@ class _StartUpState extends State<StartUp> with WidgetsBindingObserver {
     super.dispose();
   }
 
+  // 直近で実際にバックグラウンドへ落ちたか（一時的な inactive と区別する）。
+  // 購入シート・ストアレビュー依頼・権限/同意ダイアログ・外部ブラウザ等は inactive
+  // 止まりのことがあり、そこから戻っただけで App Open を出すと意図しない割り込みに
+  // なる。paused/hidden を経たときだけ「本当に復帰した」とみなす目印にする。
+  bool _wentToBackground = false;
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden) {
+      _wentToBackground = true;
+    }
     // アプリを開く（前面に戻る）たびに予約をリセットし、未来へずらし直す。
     // これにより「開き続けている間は発火せず、しばらく起動がないと通知が出る」
     // という挙動になる。
     if (state == AppLifecycleState.resumed) {
       _refreshReengagementNotifications();
+      // 本当にバックグラウンドから復帰したときだけ、条件を満たせば App Open 広告を出す。
+      // （頻度制御・新規ユーザー猶予・他広告との連続表示防止は AppOpenAdManager 側）
+      if (_wentToBackground) {
+        _wentToBackground = false;
+        AppOpenAdManager.instance.maybeShowOnResume();
+      }
     }
   }
 

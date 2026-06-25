@@ -296,7 +296,11 @@ class _AnswerViewState extends ConsumerState<ResultView> {
     }
 
     // ペイウォールを出さないときは従来どおりインタースティシャル（頻度制御あり）。
-    InterstitialAdManager.instance.maybeShow(onDone: goHome);
+    // 遊び始めの新規ユーザーには出さないよう、総プレイ回数を渡す（リテンション保護）。
+    InterstitialAdManager.instance.maybeShow(
+      totalPlays: activityLog.totalPlays,
+      onDone: goHome,
+    );
   }
 
   //画面上部に表示するメッセージ文
