@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/legacy.dart';
+import 'package:memory_game/domain/screenshot_seed.dart';
 import 'package:memory_game/model/activity_log.dart';
 
 // 継続記録（日付別の活動ログ）の管理
@@ -13,6 +14,11 @@ class ActivityLogNotifier extends StateNotifier<ActivityLog> {
   }
 
   Future<void> _load() async {
+    // スクショ用の一時シード（撮影後は screenshot_seed.dart ごと戻す）。
+    if (kScreenshotSeed) {
+      state = buildSeedActivityLog(DateTime.now());
+      return;
+    }
     state = await ActivityLog.load();
   }
 

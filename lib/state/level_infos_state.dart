@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:memory_game/constant/num_constant.dart';
 import 'package:memory_game/domain/growth.dart';
+import 'package:memory_game/domain/screenshot_seed.dart';
 import 'package:memory_game/model/level_infos.dart';
 
 //レベルごとの情報管理
@@ -32,6 +33,11 @@ class LevelInfoNotifier extends StateNotifier<List<LevelInfo>> {
   }
 
   Future<void> _loadLevelInfos() async {
+    // スクショ用の一時シード（撮影後は screenshot_seed.dart ごと戻す）。
+    if (kScreenshotSeed) {
+      state = buildSeedLevelInfos(DateTime.now());
+      return;
+    }
     final levelInfos = await LevelInfo.getLevelInfos();
     if (levelInfos != null) {
       state = List.of(levelInfos.map((e) => e.copy()));
