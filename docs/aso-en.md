@@ -65,50 +65,28 @@ visual,spatial,concentration,recall,senior,puzzle,brain teaser,working memory,at
 
 ## 5. Description (≤ 4000 chars / CVR copy — not indexed on iOS)
 
-冒頭3行が勝負。サブスク自動更新の開示は Apple ガイドライン 3.1.2 で必須。
+冒頭3行が勝負。
 
 ```
 See it. Remember it. Find it.
 
 Train your "photographic memory" the fun way — a memory game that sharpens short-term visual memory, focus, and concentration in just 5 minutes a day. Memorize what's on the grid, then recall where it was hidden behind the "?". Simple to learn, deeply rewarding to master.
 
-◆ Made for everyone — especially gentle on the eyes
-Warm, cozy colors (cream & terracotta), big easy-to-tap buttons, and large rounded text. Designed so first-timers and seniors can play with confidence — no clutter, no rush.
-
-◆ Who it's for
-• Anyone who forgets names, faces, or where things were
-• Students and professionals training memory, focus & working memory
-• Older adults who want a friendly daily brain-training habit
-• Busy people who want a quick brain game between tasks
-
-◆ Easy to play, endlessly deep
-Remember the position AND the content of the pictures, then tap what was hidden. One simple rule — but 20 levels of escalating challenge. Free Mode has no time limit, so you can take it at your own pace. Levels 1–7 are open from the start; clear them to unlock 8–20.
-
-◆ Grow a buddy, keep coming back
-Each level has an animal buddy. Every clear earns EXP, and your buddy grows through five stages — baby, child, youth, adult, and finally a "professor." A companion that's all your own keeps you coming back day after day.
+◆ A simple memory game with surprising depth
+Just memorize the positions of the shown pictures and pick them out. The rules are simple, yet with all 20 levels it goes endlessly deep. In the no-time-limit Free Mode, take it on at your own pace. It even has a "Hide" button that conceals the pictures so you can commit them to memory — really burn the image into your mind.
 
 ◆ See your progress
 • Daily streak counter to build the habit
 • Monthly calendar to visualize your training
 • Best-time ranking to feel yourself improve
 
-◆ Pricing
-Free to play. Upgrade to Premium (<local price>/month) to remove all ads and focus fully on your training.
+◆ Thoughtfully Crafted Design
+Clear, intuitive controls, easy-to-tap buttons, and charming illustrations. Reassuring even for first-timers and seniors.
 
 Ready to build a memory like a camera? Start the "see it, remember it, find it" habit today.
-
-■ About the subscription
-• Premium: <local price>/month (auto-renewable)
-• Payment is charged to your Apple ID at confirmation of purchase.
-• Subscription automatically renews unless auto-renew is turned off at least 24 hours before the end of the current period. Your account is charged for renewal within 24 hours prior to the end of the current period.
-• You can manage or cancel anytime in Settings > your Apple ID > Subscriptions.
-• Terms of Use: https://(insert memory-game Terms URL)
-• Privacy Policy: https://(insert memory-game Privacy Policy URL)
 ```
 
-- Character count: **約 2,050 字**（上限4000字。十分なバッファあり）
-- `<local price>` は各市場のローカル価格（最低価格帯相当）を差し込む。
-- URL は法務サイト（skcreation-legal / スラッグ `memory-game`）の Terms / Privacy Policy を差し込む。
+- サブスク開示を説明文から削除。App Store Connect の EULA/PP URL 欄とアプリ内ペイウォール開示は別途必須。
 - 医療効果の断定（"prevents dementia" 等）は description でも使用しない。"brain-training habit" / "sharpens memory" など習慣・トレーニング表現に留める。
 
 ---

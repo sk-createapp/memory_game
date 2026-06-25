@@ -77,43 +77,21 @@ Gehirntraining,Konzentration,fotografisch,Kurzzeitgedächtnis,Denkspiele,Seniore
 Sehen. Merken. Wiederfinden.
 Trainieren Sie Ihr fotografisches Gedächtnis – spielerisch, mit einem treuen Begleiter an Ihrer Seite. In diesem Merkspiel prägen Sie sich Bilder und ihre Positionen ein und finden wieder, was sich hinter dem „?" verbirgt. Schon 5 Minuten am Tag halten Ihr Kurzzeitgedächtnis fit.
 
-◆ Für wen ist diese App?
-• Sie vergessen öfter Namen oder wo Sie etwas hingelegt haben
-• Sie möchten Gedächtnis, Konzentration und Aufmerksamkeit trainieren
-• Sie suchen ein entspanntes Gehirnjogging ohne Zeitdruck
-• Sie möchten in kleinen Pausen geistig fit bleiben
-
-◆ Einfache Regeln, überraschend tiefgründig
-Merken Sie sich die „Position" und den „Inhalt" der gezeigten Bilder und finden Sie das versteckte Feld wieder. Die Regeln sind in Sekunden verstanden – doch mit 20 Leveln bleibt es lange spannend. Im Freien Modus spielen Sie ganz ohne Zeitlimit, in Ihrem eigenen Tempo.
-
-◆ Ein Begleiter, der mit Ihnen wächst
-Mit jedem geschafften Level sammelt Ihr tierischer Begleiter Erfahrung und wächst in 5 Stufen heran – vom Baby bis zum „Professor". So entsteht ein ganz persönliches Motivations-Ziel, das zum Weitermachen einlädt.
+◆ Einfaches, aber tiefgründiges Gedächtnisspiel
+Merken Sie sich einfach die Positionen der gezeigten Bilder und finden Sie sie wieder. Die Regeln sind schnell verstanden – und doch geht es über alle 20 Level endlos in die Tiefe. Im Freien Modus ohne Zeitlimit gehen Sie es ganz in Ihrem eigenen Tempo an. Dank der Schaltfläche „Ausblenden" verschwinden die Bilder sogar, damit Sie sie sich einprägen können – so brennt sich das Bild richtig in Ihr Gedächtnis ein.
 
 ◆ Ihre Fortschritte immer im Blick
 • Tagesserie: bleiben Sie mit Ihrer Streak am Ball
 • Monatskalender: machen Sie Ihr Training sichtbar
 • Bestzeiten-Rangliste: spüren Sie Ihren Fortschritt
 
-◆ Augenfreundlich und übersichtlich
-Warme, angenehme Farben, große gut sichtbare Tasten und große, runde Schrift. Auch für Einsteiger und Seniorinnen und Senioren angenehm zu bedienen.
-
-◆ Preise
-Die Grundversion ist kostenlos. Mit Premium (<lokaler Preis>/Monat) blenden Sie alle Werbeanzeigen aus und trainieren ganz ungestört.
+◆ Bis ins Detail durchdachtes Design
+Klare, intuitive Bedienung, gut erreichbare Schaltflächen und liebevolle Illustrationen. Beruhigend übersichtlich – auch für Einsteiger und Seniorinnen und Senioren.
 
 Möchten auch Sie ein Gedächtnis wie ein Foto? Beginnen Sie noch heute mit „Sehen, Merken, Wiederfinden".
-
-■ Hinweis zum Abo
-• Premium: <lokaler Preis>/Monat (automatische Verlängerung)
-• Die Zahlung wird bei Kaufbestätigung über Ihre Apple-ID abgebucht.
-• Das Abo verlängert sich automatisch, sofern es nicht mindestens 24 Stunden vor Ablauf des laufenden Zeitraums gekündigt wird. Die Verlängerung wird innerhalb der letzten 24 Stunden vor Ablauf berechnet.
-• Sie können Ihr Abo jederzeit in den Einstellungen Ihrer Apple-ID verwalten oder kündigen.
-• Nutzungsbedingungen: https://（memory-game の利用規約URLを差し込む）
-• Datenschutzerklärung: https://（memory-game のPP URLを差し込む）
-
-Hinweis: Diese App ist ein Unterhaltungs- und Trainingsspiel und kein medizinisches Produkt. Sie ersetzt keine ärztliche Beratung, Diagnose oder Behandlung.
 ```
 
-> 自動更新サブスクは、価格・更新条件・規約/PP リンクの明記が Apple 審査（ガイドライン 3.1.2）で**必須**。URL は法務サイト（skcreation-legal / スラッグ `memory-game`）を差し込む。末尾の医療免責は `fotografisches Gedächtnis`/`fit` 等の表現を安全側に倒すための保険。
+> 注意: サブスク開示を説明文から削除。App Store Connect の EULA/Datenschutz URL 欄とアプリ内ペイウォール開示は別途必須（自動更新サブスクの価格・更新条件・規約/PP 明記は Apple 審査ガイドライン 3.1.2 で必要）。
 
 ---
 

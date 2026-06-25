@@ -90,44 +90,24 @@ memory,brain,training,photographic,puzzle,concentration,senior,focus,recall,visu
 Ve, memoriza y recuerda.
 Entrena tu “memoria fotográfica” de forma divertida con un juego de memoria pensado para todas las edades. Solo 5 minutos al día, junto a tu mascota, para mantener tu mente ágil y despierta.
 
-◆ Para ti, si…
-・Olvidas nombres o dónde dejaste las cosas
-・Quieres ejercitar tu memoria y concentración
-・Buscas un hábito sencillo de gimnasia mental
-・Quieres entrenar el cerebro en ratos libres
-
-◆ Sencillo de aprender, difícil de soltar
-Observa las ilustraciones, memoriza “qué” había y “en qué lugar”, y adivina lo que se escondió detrás del “?”. La regla es muy simple, pero con 20 niveles el reto crece sin parar. El modo libre no tiene límite de tiempo: avanza a tu propio ritmo, sin prisas.
-
-◆ Una mascota que crece contigo
-Cada vez que superas un nivel, tu mascota gana experiencia y evoluciona en 5 etapas: bebé → pequeño → joven → adulto → ¡profesor! Un compañero que te dará ganas de volver cada día.
+◆ Juego de memoria simple pero profundo
+Solo tienes que memorizar dónde están las imágenes que se muestran y volver a elegirlas. Las reglas son sencillas, pero con sus 20 niveles el reto no tiene fin. En el Modo Libre, sin límite de tiempo, lo afrontas a tu propio ritmo. Incluso cuenta con un botón “Ocultar” que tapa las imágenes para que las grabes en tu memoria: imprime cada imagen en tu mente.
 
 ◆ Tu progreso, siempre a la vista
 ・Días seguidos jugando para crear hábito
 ・Calendario mensual con tu historial de entrenamiento
 ・Ranking de tus mejores tiempos para sentir tu avance
 
-◆ Pensado para que nadie se pierda
-Diseño en tonos cálidos que cuidan la vista, botones grandes y fáciles de pulsar, y letras grandes y redondas. Cómodo también para principiantes y para personas mayores.
-
-◆ Precio
-Jugar es gratis. Con la suscripción Premium (<precio local>/mes) se eliminan todos los anuncios para que entrenes sin distracciones.
+◆ Diseño cuidado al detalle
+Controles claros e intuitivos, botones fáciles de pulsar y ilustraciones llenas de encanto. Una experiencia que tranquiliza incluso a quienes empiezan por primera vez y a las personas mayores.
 
 ¿Listo para tener una memoria como una cámara?
 Empieza hoy el hábito de “ver, memorizar y recordar”.
 
-■ Sobre la suscripción
-・Premium: <precio local>/mes (renovación automática)
-・El pago se carga a tu cuenta de Apple ID al confirmar la compra.
-・La suscripción se renueva automáticamente salvo que desactives la renovación al menos 24 horas antes del fin del periodo; el cargo de renovación se realiza dentro de las 24 horas previas al fin del periodo.
-・Puedes gestionar o cancelar la suscripción en cualquier momento desde [Ajustes] > tu cuenta de Apple ID.
-・Términos de uso: https://(insertar URL de términos de memory-game)
-・Política de privacidad: https://(insertar URL de privacidad de memory-game)
-
 * Este juego es para entrenamiento y entretenimiento y no constituye un producto ni un diagnóstico médico.
 ```
 
-> 自動更新サブスクは、価格・更新条件・規約/PP リンクの明記が Apple 審査（ガイドライン 3.1.2）で**必須**。`<precio local>` は配信国の最低価格帯（例: es-MX なら MXN 表記、es-ES なら EUR 表記）に差し替え、URL は法務サイト（skcreation-legal / スラッグ `memory-game`）を差し込む。
+> サブスク開示を説明文から削除。App Store Connect の EULA/Privacidad URL 欄とアプリ内ペイウォール開示は別途必須。
 > es-ES 向けに配信する場合は `personas mayores` への1語置換のみで流用可。
 
 ---

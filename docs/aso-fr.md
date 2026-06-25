@@ -78,44 +78,24 @@ Voir, mémoriser, retrouver.
 
 Entraînez votre mémoire en vous amusant ! Mémorisez en un coup d'œil le contenu et la position des images sur la grille, comme une véritable mémoire photographique, puis retrouvez ce qui se cachait derrière le « ? ». Un jeu de mémoire simple et apaisant pour muscler votre cerveau, 5 minutes par jour, avec votre compagnon.
 
-◆ Pour qui ?
-・Vous oubliez souvent les noms ou l'endroit où vous avez posé vos affaires
-・Vous voulez travailler votre mémoire à court terme et votre concentration
-・Vous cherchez une bonne habitude pour garder l'esprit vif
-・Vous aimez un petit défi cérébral pendant vos temps morts
-
-◆ Simple à prendre en main, profond à maîtriser
-Mémorisez la position et le contenu des illustrations, puis retrouvez l'image cachée. La règle est limpide, mais les 20 niveaux progressifs vous réservent un vrai défi. Le mode libre, sans limite de temps, vous laisse jouer à votre rythme, en toute sérénité.
-
-◆ Un compagnon qui grandit avec vous
-À chaque niveau réussi, votre animal compagnon gagne de l'expérience et évolue en 5 étapes : du bébé au « professeur ». Une bonne raison de revenir chaque jour et de faire grandir VOTRE compagnon.
+◆ Un jeu de mémoire simple mais profond
+Il suffit de mémoriser la position des images affichées, puis de les retrouver. Les règles sont simples, mais avec ses 20 niveaux, le jeu se révèle d'une profondeur sans fin. En Mode Libre, sans limite de temps, relevez le défi à votre propre rythme. Un bouton « Masquer » permet même de cacher les images pour mieux les mémoriser : de quoi graver l'image dans votre mémoire.
 
 ◆ Vos progrès, bien visibles
 ・Jours consécutifs joués pour ancrer l'habitude
 ・Calendrier mensuel pour visualiser votre parcours
 ・Classement de vos meilleurs temps pour ressentir vos progrès
 
-◆ Pensé pour être agréable et reposant
-Des couleurs chaudes douces pour les yeux, de grands boutons faciles à toucher et de grands caractères ronds. Idéal pour les débutants comme pour les seniors.
-
-◆ Tarif
-Le jeu est gratuit. L'abonnement Premium (<prix local>/mois) masque toutes les publicités pour vous concentrer pleinement sur votre entraînement.
+◆ Un design soigné dans les moindres détails
+Des commandes claires et intuitives, de grands boutons faciles à toucher et des illustrations pleines de charme. Rassurant, même pour les débutants et les seniors.
 
 Alors, prêt à entraîner votre mémoire visuelle ? Prenez dès aujourd'hui l'habitude de « voir, mémoriser, retrouver ».
-
-■ À propos de l'abonnement
-・Premium : <prix local>/mois (renouvellement automatique)
-・Le paiement est débité sur votre compte Apple à la confirmation de l'achat.
-・L'abonnement se renouvelle automatiquement sauf s'il est désactivé au moins 24 heures avant la fin de la période en cours ; le montant du renouvellement est débité dans les 24 heures précédant la fin de la période.
-・Vous pouvez gérer ou résilier l'abonnement à tout moment depuis les réglages de votre compte Apple.
-・Conditions d'utilisation : https://（memory-game の利用規約URLを差し込む）
-・Politique de confidentialité : https://（memory-game の PP URLを差し込む）
 ```
 
 - 文字数: 約 **2 100字**（4000字上限内。CVR 重視で簡潔に）
 - 冒頭フック「Voir, mémoriser, retrouver.」＋ 1 文目で機能と価値を即提示。
 
-> 自動更新サブスクは、価格・更新条件・規約/PP リンクの明記が Apple 審査（ガイドライン 3.1.2）で**必須**。URL は法務サイト（skcreation-legal / スラッグ `memory-game`）を差し込む。`<prix local>/mois` は fr-FR は €、fr-CA は CAD$ の最低価格帯に置換。
+> サブスク開示を説明文から削除。App Store Connect の EULA/Confidentialité URL 欄とアプリ内ペイウォール開示は別途必須。
 
 ---
 
