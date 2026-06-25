@@ -183,16 +183,26 @@ class _MemorizeViewState extends ConsumerState<MemorizeView> {
                                           _isHidden = held;
                                         });
                                       },
-                                      child: Text(
-                                        AppLocalizations.of(context)!
-                                            .memorizeHide,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        textAlign: TextAlign.center,
-                                        style: const TextStyle(
-                                          color: DefColor.textWhite,
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w800,
+                                      // 円形ボタン内に必ず文字が収まるよう、
+                                      // 長い翻訳語（Verstecken / Скрывать など）は
+                                      // 縮小してフィットさせる。
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 8),
+                                        child: FittedBox(
+                                          fit: BoxFit.scaleDown,
+                                          child: Text(
+                                            AppLocalizations.of(context)!
+                                                .memorizeHide,
+                                            maxLines: 1,
+                                            softWrap: false,
+                                            textAlign: TextAlign.center,
+                                            style: const TextStyle(
+                                              color: DefColor.textWhite,
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w800,
+                                            ),
+                                          ),
                                         ),
                                       ),
                                     ),
