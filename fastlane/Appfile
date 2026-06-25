@@ -1,0 +1,7 @@
+app_identifier("com.skcreation.memorygame")
+
+# App Store Connect API キー認証を使う場合、apple_id / team_id の設定は不要。
+# Apple ID 認証を使う場合のみ下記を設定（要確認）:
+# apple_id("k.isasf@gmail.com")
+# itc_team_id("")
+# team_id("")

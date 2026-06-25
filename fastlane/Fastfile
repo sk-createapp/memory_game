@@ -1,0 +1,38 @@
+default_platform(:ios)
+
+platform :ios do
+  desc "App Store Connect に全9言語のテキストメタデータをアップロード（バイナリ/スクショは対象外・審査提出はしない）"
+  lane :upload_metadata do
+    api_key = app_store_connect_api_key(
+      key_id: ENV["ASC_KEY_ID"],
+      issuer_id: ENV["ASC_ISSUER_ID"],
+      key_filepath: ENV["ASC_KEY_FILEPATH"]
+    )
+
+    deliver(
+      api_key: api_key,
+      app_identifier: "com.skcreation.memorygame",
+      skip_binary_upload: true,   # .ipa はアップロードしない
+      skip_screenshots: true,     # スクショは別途
+      skip_metadata: false,       # テキストメタデータを反映
+      force: true,                # HTMLプレビューを出さずに実行
+      ignore_language_directory_validation: true,
+      run_precheck_before_submit: false,
+      submit_for_review: false,   # 保存のみ。提出は手動
+      automatic_release: false,
+      # 新規バージョンで Review Detail 未初期化だと fetch_app_store_review_detail が
+      # "No data" で落ちるため、審査連絡先(電話)を渡して初期化する。
+      app_review_information: { phone_number: ENV["ASC_REVIEW_PHONE"] }
+    )
+  end
+
+  desc "アップロード前にメタデータの整合をチェック（precheck）"
+  lane :check_metadata do
+    api_key = app_store_connect_api_key(
+      key_id: ENV["ASC_KEY_ID"],
+      issuer_id: ENV["ASC_ISSUER_ID"],
+      key_filepath: ENV["ASC_KEY_FILEPATH"]
+    )
+    precheck(api_key: api_key, app_identifier: "com.skcreation.memorygame")
+  end
+end

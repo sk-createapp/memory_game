@@ -1,7 +1,7 @@
 # ASO Plan — English App Store (Final)
 
 > **編集者向けサマリー（日本語）**
-> - 推奨タイトル: **`Memory Games: Brain Training`**（25字）＝「メモリゲーム（完全一致の最強需要語）」＋「ブレイントレーニング（脳トレの定番検索語）」。米国ストアで実需要が最も太い2語を両取りする構成。
+> - 推奨タイトル: **`Short Term Memory: Brain Game`**（29字）＝差別化軸「短期記憶」を先頭に据えた一意名。当初案 `Memory Games: Brain Training` は重複で使用不可だったため変更（ASC反映済み）。需要語はサブ・キーワードで回収。
 > - 推奨サブタイトル: **`Photographic Memory & Focus`**（27字）＝差別化軸の「写真記憶（photographic memory）」とタイトル未使用の「focus（集中力）」を補完。ニッチで競合が弱い photographic memory を可視フィールドに置くのが肝。
 > - キーワード欄は seniors / visual / spatial / concentration / recall など、競合が弱いロングテールで100字を埋め切る。dementia 等の医療断定語は審査リスクのため**入れない**方針（注意書きあり）。
 > - 想定カテゴリ: **Education**（大手 Lumosity/Elevate/Memory Match が採用）。サブで Puzzle も検討。
@@ -18,12 +18,12 @@
 ## 1. Title (≤ 30 chars)
 
 ```
-Memory Games: Brain Training
+Short Term Memory: Brain Game
 ```
 
-- Character count: **28** (incl. space + colon)
-- Covers: `Memory`, `Memory Games` (exact match), `Brain`, `Brain Training`, `Games`, `Training`
-- なぜこれか: 競合（Lumosity「Brain Training Games」/ Memory Match「Brain Training, Memory Games」/ Elevate「Brain Training Games」）が示す通り、米国の太い実需要は **memory games** と **brain training** の2フレーズ。両方を完全一致で抱える。「photographic」はニッチでサブタイトル側に置き、タイトルは王道ボリュームを取りに行く。
+- Character count: **29** (incl. space + colon)
+- Covers: `Short Term Memory`（低競合の差別化軸）, `Memory`, `Brain`, `Brain Game`, `Game`
+- 変更理由: 当初案 `Memory Games: Brain Training` は**別アカウントが同名で登録済み＝重複エラー**だった（App Store のアプリ名は全世界で一意）。そこで差別化軸 `Short Term Memory` を先頭に据えた一意名へ変更し、**ASCで受理・反映済み**。`memory games` / `brain training` などの太い需要語はサブタイトル・キーワードで回収する。
 
 ## 2. Subtitle (≤ 30 chars)
 

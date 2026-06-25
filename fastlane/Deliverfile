@@ -1,0 +1,8 @@
+# Deliverfile — deliver(upload_to_app_store) 共通設定（任意）
+# 主要オプションは Fastfile の upload_metadata レーンに記載。
+#
+# URL 類（サポート / マーケティング / プライバシーポリシー）は、ロケール別の
+#   fastlane/metadata/<locale>/support_url.txt
+#   fastlane/metadata/<locale>/marketing_url.txt
+#   fastlane/metadata/<locale>/privacy_url.txt
+# を置けば反映される。ファイルが無いフィールドは既存のASC値を維持（上書きしない）。
