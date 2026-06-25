@@ -6,6 +6,7 @@ import 'package:memory_game/constant/premium_constant.dart';
 import 'package:memory_game/constant/sp_key.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// 月額プレミアム購入フローの結果。呼び出し側が案内表示の要否を判断するのに使う。
 enum PurchaseOutcome {
@@ -39,6 +40,11 @@ enum PurchaseOutcome {
 class PremiumService {
   PremiumService._();
   static final PremiumService instance = PremiumService._();
+
+  /// ネイティブ（iOS）の「サブスクリプションの管理」シートを開くためのチャンネル。
+  /// AppDelegate 側の同名チャンネルと対になっている。
+  static const MethodChannel _subscriptionsChannel =
+      MethodChannel('memory_game/subscriptions');
 
   /// プレミアム権利を保持しているか。広告の表示可否はこれを唯一の真実とする。
   final ValueNotifier<bool> isPremium = ValueNotifier<bool>(false);
@@ -152,6 +158,34 @@ class PremiumService {
       purchasePending.value = false;
       return PurchaseOutcome.failed;
     }
+  }
+
+  /// サブスク管理（内容確認・解約）UI を開く。
+  ///
+  /// iOS ではまず StoreKit の「サブスクリプションの管理」シートをアプリ内に
+  /// 表示し、設定アプリやブラウザに飛ばさず操作を完結できるようにする
+  /// （meal-plan と同じ体験）。iOS 15 未満やシート表示に失敗した場合、および
+  /// iOS 以外では、ストアの管理ページを外部で開くフォールバックに切り替える。
+  Future<void> openManageSubscriptions() async {
+    if (!iapSupported) return;
+
+    // iOS はネイティブの OS シート（アプリ内モーダル）を優先する。
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      try {
+        final shown = await _subscriptionsChannel
+            .invokeMethod<bool>('showManageSubscriptions');
+        if (shown == true) return;
+      } catch (_) {
+        // チャンネル未対応・表示失敗時は URL フォールバックへ。
+      }
+    }
+
+    // フォールバック：ストアの管理ページを外部ブラウザ／ストアで開く。
+    final url = await manageSubscriptionsUrl();
+    if (url == null) return;
+    try {
+      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+    } catch (_) {}
   }
 
   /// ストアのサブスク管理（内容確認・解約）ページのURLを返す。

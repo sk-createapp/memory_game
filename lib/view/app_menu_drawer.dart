@@ -39,21 +39,14 @@ class AppMenuDrawer extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            //ヘッダー（アプリ名 ＋「メニュー」ラベル）
+            //ヘッダー（「メニュー」ラベル）
             Padding(
               padding: const EdgeInsets.fromLTRB(22, 12, 22, 14),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    l10n.homeGameTitle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppText.title.copyWith(fontSize: 26),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(l10n.menuTitle, style: AppText.recordDate),
-                ],
+              child: Text(
+                l10n.menuTitle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppText.title.copyWith(fontSize: 26),
               ),
             ),
             _divider(),
@@ -64,8 +57,6 @@ class AppMenuDrawer extends StatelessWidget {
                 children: [
                   //プレミアム（広告非表示）への導線。状態に応じて表示が変わる。
                   const _PremiumMenuTile(),
-                  //効果音（操作音・結果音）のオン/オフ切り替え。
-                  const _SoundMenuTile(),
                   _MenuTile(
                     icon: Icons.mail_outline_rounded,
                     label: l10n.menuContact,
@@ -88,6 +79,8 @@ class AppMenuDrawer extends StatelessWidget {
                     label: l10n.menuLicenses,
                     onTap: () => _showLicenses(context, l10n),
                   ),
+                  //効果音（操作音・結果音）のオン/オフ切り替え。一番下に配置する。
+                  const _SoundMenuTile(),
                 ],
               ),
             ),
@@ -155,13 +148,13 @@ class _PremiumMenuTile extends StatelessWidget {
       valueListenable: PremiumService.instance.isPremium,
       builder: (context, isPremium, _) {
         if (isPremium) {
-          // 加入済み：タップでストアのサブスク管理（内容確認・解約）を開く。
+          // 加入済み：タップで OS のサブスク管理シート（内容確認・解約）を開く。
           return GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: () {
               firePressFeedback(PressHaptic.selection);
               Navigator.of(context).pop();
-              _openManageSubscription();
+              PremiumService.instance.openManageSubscriptions();
             },
             child: Padding(
               padding:
@@ -240,16 +233,6 @@ class _PremiumMenuTile extends StatelessWidget {
         );
       },
     );
-  }
-
-  /// ストアのサブスク管理（内容確認・解約）ページを外部ブラウザ／ストアで開く。
-  /// context を使わないため、ドロワーを閉じた後に安全に呼べる。
-  Future<void> _openManageSubscription() async {
-    final url = await PremiumService.instance.manageSubscriptionsUrl();
-    if (url == null) return;
-    try {
-      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-    } catch (_) {}
   }
 
   Widget _chip(IconData icon, Color bg, Color fg) => Container(
