@@ -61,5 +61,5 @@ fastlane/report.xml
 # fastlane: ASC 調査用の一時スクリプト
 fastlane/tmp_*.rb
 
-# Claude Code: ローカル個人設定(権限許可リスト等)
-.claude/settings.local.json
+# Claude Code: ローカル個人設定(権限許可リスト等)・作業用worktreeなど一式
+.claude/

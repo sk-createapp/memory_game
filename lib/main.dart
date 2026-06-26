@@ -7,7 +7,9 @@ import 'package:memory_game/l10n/app_localizations.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:memory_game/constant/ad_constant.dart';
 import 'package:memory_game/services/admob.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:memory_game/services/consent_manager.dart';
+import 'package:memory_game/services/firebase_service.dart';
 import 'package:memory_game/services/notification_service.dart';
 import 'package:memory_game/services/premium_service.dart';
 import 'package:memory_game/services/sound_service.dart';
@@ -16,6 +18,11 @@ import 'package:memory_game/view/home.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Firebase（Analytics / Crashlytics）を最初に初期化し、以降の未捕捉エラーを
+  // Crashlytics で拾えるようにする。失敗してもアプリ起動は継続する。
+  await FirebaseService.instance.init();
+
   // 画面の向きを固定.
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
@@ -153,6 +160,10 @@ class _StartUpState extends State<StartUp> with WidgetsBindingObserver {
             ),
       ),
       home: const HomeView(),
+      // 画面遷移を Analytics に自動送信する。
+      navigatorObservers: [
+        FirebaseAnalyticsObserver(analytics: FirebaseService.instance.analytics),
+      ],
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       debugShowCheckedModeBanner: false,

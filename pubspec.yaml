@@ -56,6 +56,9 @@ dependencies:
   # 操作音・結果画面の効果音の再生に使用。
   audioplayers: ^6.1.0
   purchases_flutter: ^10.3.0
+  firebase_core: ^4.11.0
+  firebase_analytics: ^12.4.3
+  firebase_crashlytics: ^5.2.4
 
 flutter_icons:
   android: true

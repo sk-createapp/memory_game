@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "115527259274",
+    "project_id": "memory-blink-skc",
+    "storage_bucket": "memory-blink-skc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:115527259274:android:7c2e6c530fab9eee158973",
+        "android_client_info": {
+          "package_name": "com.skcreation.memorygame"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDchUaD-fuD8XZiSg1-HV3u9oE4szpnYz4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
