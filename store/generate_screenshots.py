@@ -214,18 +214,20 @@ def paste_device(canvas, dev, x, y):
     canvas.alpha_composite(dev.convert("RGBA"), (x, y))
 
 def _arrow_mask(center_x, cy):
-    """太い角丸矢印のシルエットマスクを返す。軸＋矢じり、各頂点を丸める。"""
-    m = Image.new("L", (CW, CH), 0)
-    d = ImageDraw.Draw(m)
-    # 軸（太い角丸長方形）
-    d.rounded_rectangle([center_x - 205, cy - 50, center_x + 60, cy + 50], radius=26, fill=255)
+    """太い矢印のシルエットマスクを返す。軸＋矢じりを描き、ぼかし＋閾値で
+    全ての角を均一に丸める（頂点に円を足さないので余計なコブが出ない）。
+    アンチエイリアスのため 2倍解像度で作って縮小する。"""
+    S = 2
+    big = Image.new("L", (CW * S, CH * S), 0)
+    d = ImageDraw.Draw(big)
+    cx, cyy = center_x * S, cy * S
+    # 軸
+    d.rectangle([cx - 205 * S, cyy - 50 * S, cx + 60 * S, cyy + 50 * S], fill=255)
     # 矢じり
-    head = [(center_x + 0, cy - 140), (center_x + 0, cy + 140), (center_x + 208, cy)]
-    d.polygon(head, fill=255)
-    # 頂点を丸める
-    for vx, vy in head:
-        d.ellipse([vx - 24, vy - 24, vx + 24, vy + 24], fill=255)
-    return m
+    d.polygon([(cx + 0, cyy - 138 * S), (cx + 0, cyy + 138 * S), (cx + 210 * S, cyy)], fill=255)
+    big = big.filter(ImageFilter.GaussianBlur(11 * S))
+    big = big.point(lambda v: 255 if v >= 128 else 0)
+    return big.resize((CW, CH), Image.LANCZOS)
 
 def half_arrow(canvas, center_x, cy):
     """center_x を中心に太い立体的な矢印を描く。画面外はクリップされ、
