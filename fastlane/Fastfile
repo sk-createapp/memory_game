@@ -41,7 +41,9 @@ platform :ios do
       skip_metadata: true,            # テキストメタデータは別 lane(upload_metadata)
       skip_screenshots: false,        # スクショをアップロードする
       overwrite_screenshots: true,    # 既存スクショを全置換
-      screenshots_path: "fastlane/screenshots",
+      # deliver はアクション実行時に CWD を fastlane/ へ移すため、相対パスだと
+      # チェックサム読込で取りこぼす。Fastfile 基準の絶対パスで渡す。
+      screenshots_path: File.expand_path("screenshots", __dir__),
       force: true,                    # HTMLプレビューを出さずに実行
       run_precheck_before_submit: false,
       submit_for_review: false,       # 保存のみ。提出は手動
