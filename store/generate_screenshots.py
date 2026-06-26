@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """App Store 掲載用スクショ生成スクリプト（全言語）。
-元画像（日本語UIのスクショ）に各言語のキャッチコピーを重ね、
+各言語の実機UIキャプチャに各言語のキャッチコピーを重ね、
 6.7インチ(1290x2796)のストア画像を言語別に書き出す。
 矢印は隣り合う2枚に跨って1本に見えるよう、右端/左端に半分ずつ描画する。
 """
 import os
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
-SRC = "/Users/user/Downloads/名称未設定フォルダ 3"   # 元スクショ(日本語UI)
+SRC = "/Users/user/Downloads/名称未設定フォルダ 3"   # 元スクショ(言語別の実機UI)
 OUT_ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "screenshots")
 
 CW, CH = 1290, 2796
@@ -108,7 +108,24 @@ T = {
     },
 }
 
-SRC_MAP = {"s1": "IMG_1425.png", "s2": "IMG_1426.png", "s3": "IMG_1427.png", "s4": "IMG_1429.png", "s5": "IMG_1424.png"}
+# 言語別の元スクショ（各言語の実機UIキャプチャ）。
+# 各グループは順に home / memorize / hidden / answer / result / record。
+# s1=memorize, s2=hidden, s3=answer, s4=record, s5=home を使う。
+def _grp(home, memorize, hidden, answer, record):
+    return {"s1": f"IMG_{memorize}.png", "s2": f"IMG_{hidden}.png",
+            "s3": f"IMG_{answer}.png", "s4": f"IMG_{record}.png", "s5": f"IMG_{home}.png"}
+
+SRC_BY_LANG = {
+    "ja": _grp(1424, 1425, 1426, 1427, 1429),
+    "de": _grp(1440, 1441, 1442, 1443, 1445),
+    "es": _grp(1446, 1447, 1448, 1449, 1451),
+    "hi": _grp(1452, 1453, 1454, 1455, 1457),
+    "fr": _grp(1458, 1459, 1460, 1461, 1463),
+    "ru": _grp(1464, 1465, 1466, 1467, 1470),
+    "zh": _grp(1471, 1475, 1476, 1477, 1479),
+    "ko": _grp(1480, 1483, 1484, 1485, 1487),
+    "en": _grp(1488, 1489, 1490, 1491, 1493),
+}
 
 ARROW_Y = 1534
 DEV_W = 860
@@ -221,7 +238,7 @@ def make_step(lang, key, exit_right, enter_left):
     sf = font(sub_path, 50, sub_idx)
     sublines, sf = fit_text(d, sub, sub_path, sub_idx, 1120, 52, 40, max_lines=2)
     draw_lines_center(d, CW / 2, end_y + 26, sublines, sf, BROWN_L, 1.2)
-    dev = device(SRC_MAP[key], DEV_W)
+    dev = device(SRC_BY_LANG[lang][key], DEV_W)
     dw, dh = dev.size
     paste_device(c, dev, (CW - dw) // 2, DEV_DY)
     if exit_right:
@@ -240,7 +257,7 @@ def make_cta(lang, enter_left):
     y = draw_lines_center(d, CW / 2, 150, leadlines, lf, BROWN_L, 1.2)
     tlines, tf = fit_text(d, title, head_path, head_idx, 1150, 128, 80, max_lines=2)
     draw_lines_center(d, CW / 2, y + 18, tlines, tf, TEAL, 1.1)
-    dev = device(SRC_MAP["s5"], 760)
+    dev = device(SRC_BY_LANG[lang]["s5"], 760)
     dw, dh = dev.size
     dx, dy = (CW - dw) // 2, 600
     paste_device(c, dev, dx, dy)
