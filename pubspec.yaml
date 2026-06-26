@@ -68,7 +68,11 @@ flutter_icons:
   adaptive_icon_foreground: 'assets/icon/icon_foreground.png'
 
 dev_dependencies:
+  flutter_driver:
+    sdk: flutter
   flutter_test:
+    sdk: flutter
+  integration_test:
     sdk: flutter
   build_runner:
   json_serializable:

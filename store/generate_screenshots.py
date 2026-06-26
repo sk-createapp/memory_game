@@ -221,10 +221,10 @@ def _arrow_mask(center_x, cy):
     big = Image.new("L", (CW * S, CH * S), 0)
     d = ImageDraw.Draw(big)
     cx, cyy = center_x * S, cy * S
-    # 軸
-    d.rectangle([cx - 205 * S, cyy - 50 * S, cx + 60 * S, cyy + 50 * S], fill=255)
-    # 矢じり
-    d.polygon([(cx + 0, cyy - 138 * S), (cx + 0, cyy + 138 * S), (cx + 210 * S, cyy)], fill=255)
+    # 軸（端末との間に余白を作るため、軸の付け根を短くした）
+    d.rectangle([cx - 160 * S, cyy - 50 * S, cx + 60 * S, cyy + 50 * S], fill=255)
+    # 矢じり（先の幅を広げ、かつ端末に当たらないよう先端を短くした）
+    d.polygon([(cx + 0, cyy - 168 * S), (cx + 0, cyy + 168 * S), (cx + 170 * S, cyy)], fill=255)
     big = big.filter(ImageFilter.GaussianBlur(11 * S))
     big = big.point(lambda v: 255 if v >= 128 else 0)
     return big.resize((CW, CH), Image.LANCZOS)
@@ -235,7 +235,7 @@ def half_arrow(canvas, center_x, cy):
     隣接2枚を並べると1本の矢印に繋がる。"""
     mask = _arrow_mask(center_x, cy)
     # 縦グラデーション（上=明るい橙 / 下=濃い橙）で立体感
-    y0, y1 = cy - 165, cy + 165
+    y0, y1 = cy - 185, cy + 185
     top, bot = (240, 146, 96), (190, 84, 46)
     grad = Image.new("RGBA", (CW, CH), (0, 0, 0, 0))
     gd = ImageDraw.Draw(grad)
@@ -353,12 +353,13 @@ def make_cta(lang, enter_left):
 def build(lang):
     out = os.path.join(OUT_ROOT, lang)
     os.makedirs(out, exist_ok=True)
+    # 矢印は 1→2→3 のフローのみを繋ぐ（4枚目以降には付けない）
     slides = [
         make_step(lang, "s1", exit_right=True, enter_left=False),
         make_step(lang, "s2", exit_right=True, enter_left=True),
-        make_step(lang, "s3", exit_right=True, enter_left=True),
-        make_step(lang, "s4", exit_right=True, enter_left=True),
-        make_cta(lang, enter_left=True),
+        make_step(lang, "s3", exit_right=False, enter_left=True),
+        make_step(lang, "s4", exit_right=False, enter_left=False),
+        make_cta(lang, enter_left=False),
     ]
     for i, s in enumerate(slides, 1):
         s.convert("RGB").save(os.path.join(out, f"store_{i:02d}.png"), "PNG")
