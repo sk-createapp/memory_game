@@ -262,90 +262,19 @@ def half_arrow(canvas, center_x, cy):
 
 # 元スクショ(1206x2622)における「隠す」ボタンの中心と半径
 BTN_HIDE = (1050, 2383, 88)
-SKIN = (235, 197, 159)
-SKIN_D = (208, 164, 124)
-CUFF = (60, 139, 139)
-CUFF_D = (44, 108, 108)
 
-def _lerp(a, b, t):
-    t = max(0.0, min(1.0, t))
-    return tuple(int(a[i] + (b[i] - a[i]) * t) for i in range(3))
-
+# 指イラスト: Microsoft Fluent Emoji "Backhand index pointing up"(Flat, Light)。
+# MIT ライセンス（商用無料・帰属不要）。SVG を白/黒背景で描画しアルファ復元してPNG化済み。
+ASSET_FINGER = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "finger_pointing.png")
+FINGER_TIP = (0.363, 0.0)   # アセット内の指先の相対位置(x,y)
 _HAND_CACHE = {}
 
 def _hand_img(target_h):
-    """上を指す人差し指のみを高品質に描く（手の甲・他の指なし）。
-    円柱状グラデーション＋爪＋関節のしわ＋ティール袖口。2倍解像度で描いて縮小。"""
     if target_h in _HAND_CACHE:
         return _HAND_CACHE[target_h]
-    S = 2
-    TW, TH = 200, 384
-    W, H = TW * S, TH * S
-    L, R = 58, 142          # 指の左右端
-    TIP, BASE = 30, 318     # 指先・付け根のy
-    Lx, Rx = L * S, R * S
-
-    def sc(box):
-        return [v * S for v in box]
-
-    # シルエット（指のカプセル＋袖口）
-    mask = Image.new("L", (W, H), 0)
-    dm = ImageDraw.Draw(mask)
-    dm.rounded_rectangle(sc([L, TIP, R, BASE]), radius=(R - L) // 2 * S, fill=255)
-    dm.rounded_rectangle(sc([44, 300, 156, 366]), radius=30 * S, fill=255)
-    mask = mask.filter(ImageFilter.GaussianBlur(1.2 * S)).point(lambda v: 255 if v >= 128 else 0)
-
-    def clip(layer):
-        layer.putalpha(Image.composite(layer.getchannel("A"), Image.new("L", (W, H), 0), mask))
-        hand.alpha_composite(layer)
-
-    hand = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-    # 円柱シェーディング（左寄りにハイライト、右へ陰）
-    stops = [(0.0, (205, 161, 121)), (0.32, (250, 226, 198)),
-             (0.60, (236, 199, 162)), (1.0, (197, 153, 113))]
-    def colu(u):
-        for i in range(len(stops) - 1):
-            u0, c0 = stops[i]; u1, c1 = stops[i + 1]
-            if u <= u1:
-                return _lerp(c0, c1, (u - u0) / (u1 - u0) if u1 > u0 else 0)
-        return stops[-1][1]
-    grad = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-    gp = grad.load()
-    for x in range(Lx, Rx + 1):
-        c = colu((x - Lx) / (Rx - Lx)) + (255,)
-        for y in range(H):
-            gp[x, y] = c
-    hand.paste(grad, (0, 0), mask)
-
-    # 爪（指先、少し明るい）
-    nail = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-    nd = ImageDraw.Draw(nail)
-    nd.rounded_rectangle(sc([79, 48, 121, 116]), radius=19 * S, fill=(249, 235, 220, 255))
-    clip(nail)
-
-    # 関節のしわ（やわらかいアーチ、控えめ）
-    cr = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-    crd = ImageDraw.Draw(cr)
-    for cy_ in (168, 232):
-        crd.arc(sc([L + 4, cy_ - 16, R - 4, cy_ + 16]), start=18, end=162,
-                fill=SKIN_D + (150,), width=int(5 * S))
-    clip(cr)
-
-    # 付け根の影 → 袖口（ティール）
-    cuff = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-    cd = ImageDraw.Draw(cuff)
-    cd.rounded_rectangle(sc([40, 296, 160, 366]), radius=30 * S, fill=CUFF + (255,))
-    cd.rounded_rectangle(sc([40, 296, 160, 312]), radius=14 * S, fill=CUFF_D + (255,))
-    clip(cuff)
-
-    # 指先の柔らかいハイライト（左寄りの細い艶）
-    sp = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-    ImageDraw.Draw(sp).ellipse(sc([72, 44, 90, 150]), fill=(255, 251, 244, 90))
-    sp = sp.filter(ImageFilter.GaussianBlur(3 * S))
-    clip(sp)
-
-    tw = max(1, int(TW * (target_h / TH)))
-    out = hand.resize((tw, target_h), Image.LANCZOS)
+    im = Image.open(ASSET_FINGER).convert("RGBA")
+    w = max(1, int(im.width * target_h / im.height))
+    out = im.resize((w, target_h), Image.LANCZOS)
     _HAND_CACHE[target_h] = out
     return out
 
@@ -364,11 +293,11 @@ def add_tap_hand(canvas):
     fd.ellipse([bx - br - 18, by - br - 18, bx + br + 18, by + br + 18], outline=(255, 255, 255, 150), width=7)
     fd.ellipse([bx - br - 40, by - br - 40, bx + br + 40, by + br + 40], outline=(255, 255, 255, 70), width=6)
     canvas.alpha_composite(fx)
-    # 指イラスト（ボタン直下、指先がボタンに触れる）
-    hand = _hand_img(int(br * 4.3))
-    fingertip_x, fingertip_y = hand.width * 0.50, hand.height * 0.078
+    # 指イラスト（指先がボタンに触れるよう配置）
+    hand = _hand_img(int(br * 5.0))
+    fingertip_x, fingertip_y = hand.width * FINGER_TIP[0], hand.height * FINGER_TIP[1]
     px = int(bx - fingertip_x)
-    py = int(by + br * 0.15 - fingertip_y)
+    py = int(by - br * 0.15 - fingertip_y)
     # 影
     sh = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
     sil = Image.new("RGBA", hand.size, (45, 33, 22, 255))
