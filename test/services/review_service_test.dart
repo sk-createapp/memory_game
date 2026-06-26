@@ -39,11 +39,12 @@ void main() {
     return prefs.getInt(SpKey.reviewRequestCount.name) ?? 0;
   }
 
-  group('ReviewService.maybeRequestReviewOnAchievement', () {
+  group('ReviewService.maybeRequestReviewAfterClear', () {
     test('新記録かつ十分に遊び込んでいれば依頼を出し、回数を記録する', () async {
-      await ReviewService.instance.maybeRequestReviewOnAchievement(
+      await ReviewService.instance.maybeRequestReviewAfterClear(
         isNewRecord: true,
         clearNum: 5,
+        playDays: 3,
       );
 
       expect(fake.requestReviewCallCount, 1);
@@ -51,9 +52,10 @@ void main() {
     });
 
     test('新記録でなければ達成感のピークではないので出さない', () async {
-      await ReviewService.instance.maybeRequestReviewOnAchievement(
+      await ReviewService.instance.maybeRequestReviewAfterClear(
         isNewRecord: false,
         clearNum: 50,
+        playDays: 3,
       );
 
       expect(fake.requestReviewCallCount, 0);
@@ -61,9 +63,21 @@ void main() {
     });
 
     test('クリア回数が少ない（評価が定まらない）ユーザーには出さない', () async {
-      await ReviewService.instance.maybeRequestReviewOnAchievement(
+      await ReviewService.instance.maybeRequestReviewAfterClear(
         isNewRecord: true,
         clearNum: 4,
+        playDays: 3,
+      );
+
+      expect(fake.requestReviewCallCount, 0);
+      expect(await requestCountPref(), 0);
+    });
+
+    test('プレイ日数が少ない（複数日使っていない）ユーザーには出さない', () async {
+      await ReviewService.instance.maybeRequestReviewAfterClear(
+        isNewRecord: true,
+        clearNum: 100,
+        playDays: 2,
       );
 
       expect(fake.requestReviewCallCount, 0);
@@ -75,9 +89,10 @@ void main() {
         SpKey.reviewRequestCount.name: 3,
       });
 
-      await ReviewService.instance.maybeRequestReviewOnAchievement(
+      await ReviewService.instance.maybeRequestReviewAfterClear(
         isNewRecord: true,
         clearNum: 100,
+        playDays: 3,
       );
 
       expect(fake.requestReviewCallCount, 0);
@@ -89,9 +104,10 @@ void main() {
         SpKey.reviewRequestCount.name: 1,
       });
 
-      await ReviewService.instance.maybeRequestReviewOnAchievement(
+      await ReviewService.instance.maybeRequestReviewAfterClear(
         isNewRecord: true,
         clearNum: 100,
+        playDays: 3,
       );
 
       expect(fake.requestReviewCallCount, 0);
@@ -106,9 +122,10 @@ void main() {
         SpKey.reviewRequestCount.name: 1,
       });
 
-      await ReviewService.instance.maybeRequestReviewOnAchievement(
+      await ReviewService.instance.maybeRequestReviewAfterClear(
         isNewRecord: true,
         clearNum: 100,
+        playDays: 3,
       );
 
       expect(fake.requestReviewCallCount, 1);
@@ -119,9 +136,10 @@ void main() {
       fake = _FakeInAppReview(available: false);
       InAppReviewPlatform.instance = fake;
 
-      await ReviewService.instance.maybeRequestReviewOnAchievement(
+      await ReviewService.instance.maybeRequestReviewAfterClear(
         isNewRecord: true,
         clearNum: 100,
+        playDays: 3,
       );
 
       expect(fake.requestReviewCallCount, 0);

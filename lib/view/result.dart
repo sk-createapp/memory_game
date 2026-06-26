@@ -196,7 +196,8 @@ class _AnswerViewState extends ConsumerState<ResultView> {
                                   //ホームボタン
                                   MyTextButton(
                                       onPressed: () => _leaveToHome(context),
-                                      text: "Home"),
+                                      text: AppLocalizations.of(context)!
+                                          .backHomeShort),
                                   SizedBox(height: context.sectionGap),
                                   //コメント（キャラクターのしっぽ付き吹き出し）
                                   //吹き出しはテキスト量に応じて幅が伸縮する。
@@ -313,7 +314,8 @@ class _AnswerViewState extends ConsumerState<ResultView> {
       message = AppLocalizations.of(context)!.resultGameFailure;
     }
 
-    return "Level ${gameLevel + 1} $message";
+    final levelLabel = AppLocalizations.of(context)!.levelLabel(gameLevel + 1);
+    return "$levelLabel $message";
   }
 
   //吹き出しに表示する一言（成功＝ほめ言葉／新記録／失敗＝励まし）
@@ -342,7 +344,8 @@ class _AnswerViewState extends ConsumerState<ResultView> {
     if (isAllCorrect(itemTableInfo.tableItems, itemTableInfo.answerItemNum)) {
       Duration? duration = itemTableInfo.memorizeTime;
       if (duration != null) {
-        ret = "Time ${getFormattedTime(duration)}";
+        ret = AppLocalizations.of(context)!
+            .timeLabel(getFormattedTime(duration));
       }
     }
 

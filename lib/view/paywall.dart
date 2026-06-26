@@ -235,11 +235,15 @@ class _PaywallViewState extends State<PaywallView> {
                   ),
                   SizedBox(height: context.sectionGap),
                   // 購入ボタン（進行中はスピナー）。
+                  // ストアから実パッケージ（monthlyPackage）が取れている時のみ
+                  // 購入導線を活性化する。null の間（Offering 取得失敗・current==null・
+                  // 商品未承認など）は、フォールバック価格は表示しつつもスピナー表示に
+                  // 留め、押しても失敗する購入ボタンを出さない。
                   Center(
-                    child: ValueListenableBuilder<bool>(
-                      valueListenable: PremiumService.instance.purchasePending,
-                      builder: (context, pending, _) {
-                        if (pending) {
+                    child: ValueListenableBuilder<Package?>(
+                      valueListenable: PremiumService.instance.monthlyPackage,
+                      builder: (context, package, _) {
+                        if (package == null) {
                           return SizedBox(
                             height: context.buttonHeightFor(),
                             child: const Center(
@@ -254,13 +258,34 @@ class _PaywallViewState extends State<PaywallView> {
                             ),
                           );
                         }
-                        return MyTextButton(
-                          text: l10n.premiumSubscribe,
-                          backColor: DefColor.select,
-                          edgeColor: DefColor.selectDeep,
-                          textColor: DefColor.textBlack,
-                          widthRatio: 0.95,
-                          onPressed: _subscribe,
+                        return ValueListenableBuilder<bool>(
+                          valueListenable:
+                              PremiumService.instance.purchasePending,
+                          builder: (context, pending, _) {
+                            if (pending) {
+                              return SizedBox(
+                                height: context.buttonHeightFor(),
+                                child: const Center(
+                                  child: SizedBox(
+                                    width: 28,
+                                    height: 28,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 3,
+                                      color: DefColor.selectDeep,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }
+                            return MyTextButton(
+                              text: l10n.premiumSubscribe,
+                              backColor: DefColor.select,
+                              edgeColor: DefColor.selectDeep,
+                              textColor: DefColor.textBlack,
+                              widthRatio: 0.95,
+                              onPressed: _subscribe,
+                            );
+                          },
                         );
                       },
                     ),

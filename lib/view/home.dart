@@ -205,7 +205,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
                             SizedBox(height: context.sectionGap / 2),
                             //ベストタイム
                             Text(
-                              "Level ${gameLevel + 1} Best Time",
+                              AppLocalizations.of(context)!
+                                  .bestTimeLabel(gameLevel + 1),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: AppText.subheading,
@@ -321,7 +322,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
                                         if (mounted) setState(() {});
                                       });
                                     },
-                              text: "Start",
+                              text: AppLocalizations.of(context)!
+                                  .homeStartButton,
                             ),
                             const Spacer(),
                             //バナー

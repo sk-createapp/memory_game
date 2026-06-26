@@ -56,6 +56,11 @@ Future<void> _initMonetization() async {
 
   // GDPR 等の同意を取得（必要時のみ同意フォームを表示）。
   await ConsentManager.gatherConsent();
+  // 同意が得られていない地域（UMP の canRequestAds==false）では広告をリクエストしない。
+  // フォームエラー・同意拒否時はここで打ち切り、初期化も markReady() も行わない。
+  // （markReady() を呼ばないため、バナー／App Open の load は AdsBootstrap.ready を
+  //  待ったまま起動せず、広告リクエストが発生しない＝GDPR/AdMob ポリシー順守。）
+  if (!await ConsentManager.canRequestAds()) return;
   // AdMob SDK の初期化。
   await MobileAds.instance.initialize();
   // バナー等の広告ウィジェットに「ロード開始してよい」と通知する。

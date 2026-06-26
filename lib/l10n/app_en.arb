@@ -16,6 +16,25 @@
 "resultGameClear": "Complete!",
 "resultGameFailure": "Failed...",
 "resultBackHome": "Return to the home screen",
+"backHomeShort": "Home",
+"levelLabel": "Level {n}",
+"@levelLabel": {
+  "placeholders": {
+    "n": { "type": "int" }
+  }
+},
+"timeLabel": "Time {t}",
+"@timeLabel": {
+  "placeholders": {
+    "t": { "type": "String" }
+  }
+},
+"bestTimeLabel": "Level {n} Best Time",
+"@bestTimeLabel": {
+  "placeholders": {
+    "n": { "type": "int" }
+  }
+},
 "resultComment": "You're a genius",
 "resultNewRecord": "New Record!",
 "homeLastRecord": "Latest",

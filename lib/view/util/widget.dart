@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:memory_game/l10n/app_localizations.dart';
 import 'package:memory_game/constant/color_constant.dart';
 import 'package:memory_game/constant/num_constant.dart';
 import 'package:memory_game/constant/text_style.dart';
@@ -52,7 +53,7 @@ class GameTopBar extends StatelessWidget {
                   // よう Flexible で包み、収まらなければ省略表示にする。
                   Flexible(
                     child: Text(
-                      "Level ${level + 1}",
+                      AppLocalizations.of(context)!.levelLabel(level + 1),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: AppText.heading,
@@ -274,6 +275,10 @@ class _AnswerTableState extends State<AnswerTable> {
 
     //アイテムの高さを取得
     WidgetsBinding.instance.addPostFrameCallback((cb) {
+      //ビルド後の破棄でコールバックが発火した場合の防御(破棄済みrefへの書き込み回避)
+      if (!mounted) {
+        return;
+      }
       final func = widget.getItemHeights;
       if (func == null) {
         return;
