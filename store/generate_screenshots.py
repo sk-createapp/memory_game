@@ -260,6 +260,102 @@ def half_arrow(canvas, center_x, cy):
     canvas.alpha_composite(arrow)
     canvas.alpha_composite(hi)
 
+# 元スクショ(1206x2622)における「隠す」ボタンの中心と半径
+BTN_HIDE = (1050, 2383, 88)
+SKIN = (235, 197, 159)
+SKIN_D = (208, 164, 124)
+CUFF = (60, 139, 139)
+CUFF_D = (44, 108, 108)
+
+def _hand_img(target_h):
+    """フラットなアプリのアートに合わせ、上を指す手をベクター描画する。
+    人差し指(上)＋握った拳＋親指＋袖口。2倍解像度で描いて縮小しAAを得る。"""
+    S = 2
+    TW, TH = 280, 380
+    W, H = TW * S, TH * S
+
+    def sc(box):
+        return [v * S for v in box]
+
+    # シルエットのマスク（各パーツの角丸長方形/楕円の和）
+    mask = Image.new("L", (W, H), 0)
+    dm = ImageDraw.Draw(mask)
+    dm.rounded_rectangle(sc([80, 20, 140, 202]), radius=30 * S, fill=255)   # 人差し指
+    dm.rounded_rectangle(sc([56, 150, 222, 314]), radius=48 * S, fill=255)  # 拳
+    dm.ellipse(sc([172, 178, 236, 252]), fill=255)                          # 親指
+    dm.rounded_rectangle(sc([62, 298, 218, 362]), radius=30 * S, fill=255)  # 袖口
+    mask = mask.filter(ImageFilter.GaussianBlur(2 * S)).point(lambda v: 255 if v >= 128 else 0)
+
+    hand = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    hand.paste(Image.new("RGBA", (W, H), SKIN + (255,)), (0, 0), mask)
+    hd = ImageDraw.Draw(hand)
+
+    def clip(layer):
+        layer.putalpha(Image.composite(layer.getchannel("A"), Image.new("L", (W, H), 0), mask))
+        hand.alpha_composite(layer)
+
+    # 袖口（ブランドのティール）
+    cuff = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    cd = ImageDraw.Draw(cuff)
+    cd.rounded_rectangle(sc([60, 302, 220, 362]), radius=30 * S, fill=CUFF + (255,))
+    cd.rounded_rectangle(sc([60, 302, 220, 316]), radius=12 * S, fill=CUFF_D + (255,))  # 袖の折り返し
+    clip(cuff)
+
+    # 右側の陰影（横グラデーションでフラットな立体感、硬い境目を出さない）
+    shade = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    sp = shade.load()
+    x_from, x_to, a_max = int(0.52 * W), int(0.96 * W), 120
+    for x in range(x_from, W):
+        t = min(1.0, (x - x_from) / (x_to - x_from))
+        a = int(a_max * t)
+        for y in range(H):
+            sp[x, y] = SKIN_D + (a,)
+    clip(shade)
+
+    # 握った指の境目（やわらかい溝）と親指の境目
+    def groove(x0, y0, x1, y1, w):
+        hd.line([(x0 * S, y0 * S), (x1 * S, y1 * S)], fill=SKIN_D + (255,), width=int(w * S))
+        for (gx, gy) in [(x0, y0), (x1, y1)]:
+            r = w * S / 2
+            hd.ellipse([gx * S - r, gy * S - r, gx * S + r, gy * S + r], fill=SKIN_D + (255,))
+    groove(112, 162, 112, 206, 6)
+    groove(150, 160, 150, 208, 6)
+    hd.arc(sc([158, 176, 232, 256]), start=-58, end=58, fill=SKIN_D + (255,), width=int(6 * S))
+    # 人差し指の付け根のしわ
+    groove(92, 150, 130, 150, 5)
+
+    tw = max(1, int(TW * (target_h / TH)))
+    return hand.resize((tw, target_h), Image.LANCZOS)
+
+def add_tap_hand(canvas):
+    """隠すボタンを押す指イラスト＋押下フィードバックを重ねる（全言語共通位置）。"""
+    sx = DEV_W / 1206.0
+    cx0 = (CW - (DEV_W + 32)) // 2 + 16   # 端末内スクショの原点X
+    cy0 = DEV_DY + 16                      # 原点Y
+    bx = cx0 + BTN_HIDE[0] * sx
+    by = cy0 + BTN_HIDE[1] * sx
+    br = BTN_HIDE[2] * sx
+    # 押下フィードバック（白の発光＋外側リング）
+    fx = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
+    fd = ImageDraw.Draw(fx)
+    fd.ellipse([bx - br * 0.96, by - br * 0.96, bx + br * 0.96, by + br * 0.96], fill=(255, 255, 255, 70))
+    fd.ellipse([bx - br - 18, by - br - 18, bx + br + 18, by + br + 18], outline=(255, 255, 255, 150), width=7)
+    fd.ellipse([bx - br - 40, by - br - 40, bx + br + 40, by + br + 40], outline=(255, 255, 255, 70), width=6)
+    canvas.alpha_composite(fx)
+    # 指イラスト（ボタン直下、指先がボタンに触れる）
+    hand = _hand_img(int(br * 4.1))
+    fingertip_x, fingertip_y = hand.width * 0.40, hand.height * 0.06
+    px = int(bx - fingertip_x)
+    py = int(by + br * 0.18 - fingertip_y)
+    # 影
+    sh = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
+    sil = Image.new("RGBA", hand.size, (45, 33, 22, 255))
+    sil.putalpha(hand.getchannel("A").point(lambda v: int(v * 0.45)))
+    sh.alpha_composite(sil, (px + 12, py + 18))
+    sh = sh.filter(ImageFilter.GaussianBlur(16))
+    canvas.alpha_composite(sh)
+    canvas.alpha_composite(hand, (px, py))
+
 def make_step(lang, key, exit_right, enter_left):
     head_path, head_idx = FONTS[lang][0]
     sub_path, sub_idx = FONTS[lang][1]
@@ -274,6 +370,8 @@ def make_step(lang, key, exit_right, enter_left):
     dev = device(SRC_BY_LANG[lang][key], DEV_W)
     dw, dh = dev.size
     paste_device(c, dev, (CW - dw) // 2, DEV_DY)
+    if key == "s2":
+        add_tap_hand(c)
     if exit_right:
         half_arrow(c, CW, ARROW_Y)
     if enter_left:
