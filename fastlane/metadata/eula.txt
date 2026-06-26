@@ -1,0 +1,28 @@
+END USER LICENSE AGREEMENT — Memory Blink
+
+This app ("Memory Blink" / "シカクキオク") is provided by skcreation ("the Developer"). By downloading or using the app, you agree to the Terms of Use and Privacy Policy linked below.
+
+- Terms of Use: https://skcreation-legal.pages.dev/memory-game/en/terms
+- Privacy Policy: https://skcreation-legal.pages.dev/memory-game/en/privacy
+
+License. The Developer grants you a personal, non-exclusive, non-transferable, revocable license to use the app for personal, non-commercial purposes. Except as permitted by applicable law, you may not reverse-engineer, decompile, modify, redistribute, rent, or sublicense the app.
+
+Auto-renewable subscription. The app is supported by advertisements. An optional "Premium (no ads)" auto-renewable monthly subscription removes ads; all game features remain available without the subscription. Payment is charged to your Apple ID at confirmation of purchase. The subscription automatically renews unless canceled at least 24 hours before the end of the current period, and your account is charged for renewal within 24 hours before the end of the period. Manage or cancel anytime in Settings > Apple ID > Subscriptions. No refund is provided for the unused portion of a period.
+
+Disclaimer. The app is provided "as is" without warranties of any kind. To the extent permitted by law, the Developer is not liable for any damages arising from use of the app. Your use of the app is also subject to the Apple Media Services Terms and Conditions.
+
+────────────────────────────
+
+エンドユーザー使用許諾契約（EULA）— シカクキオク
+
+本アプリ「シカクキオク」（英名 Memory Blink）は skcreation（以下「開発者」）が提供します。本アプリをダウンロードまたは利用することにより、以下の利用規約およびプライバシーポリシーに同意したものとみなされます。
+
+- 利用規約: https://skcreation-legal.pages.dev/memory-game/ja/terms
+- プライバシーポリシー: https://skcreation-legal.pages.dev/memory-game/ja/privacy
+- 特定商取引法に基づく表記: https://skcreation-legal.pages.dev/tokushoho
+
+ライセンス。開発者は、本アプリを個人的かつ非商業的な目的で利用するための、非独占的・譲渡不能・取消可能なライセンスを付与します。適用法で認められる範囲を除き、リバースエンジニアリング、逆コンパイル、改変、再配布、貸与、再許諾はできません。
+
+自動更新サブスクリプション。本アプリは広告により運営されています。任意の「プレミアム（広告なし）」月額自動更新サブスクリプションにより広告を非表示にできます（ゲーム機能はサブスクリプションなしで利用できます）。料金は購入確定時に Apple ID に請求されます。期間終了の24時間以上前に解約しない限り自動的に更新され、更新料金は期間終了前24時間以内に請求されます。解約は「設定 > Apple ID > サブスクリプション」からいつでも可能です。未使用期間分の返金は行いません。
+
+免責。本アプリは現状有姿で提供され、明示・黙示を問わずいかなる保証も行いません。法令で認められる範囲において、開発者は本アプリの利用により生じた損害について責任を負いません。本アプリの利用には Apple メディアサービス利用規約も適用されます。

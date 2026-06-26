@@ -33,6 +33,9 @@ puts "VERSION        #{vd['versionString']}  state=#{vd['appStoreState']}  relea
 b = get(TC, "v1/appStoreVersions/#{vid}/build")['data']
 puts "BUILD          #{b ? b['id'][0, 8] : 'NONE attached'}"
 puts "AGE RATING     #{ai['appStoreAgeRating']}"
+ard = get(TC, "v1/appInfos/#{info.id}", { 'include' => 'ageRatingDeclaration' })
+adv = (ard['included'] || []).find { |i| i['type'] == 'ageRatingDeclarations' }&.dig('attributes', 'advertising')
+puts "  advertising  #{adv.inspect}  (広告表示アプリは true 必須)"
 puts "CONTENT RIGHTS #{app.content_rights_declaration}"
 
 mp = get(TC, "v1/appPriceSchedules/#{app.id}/manualPrices", { 'include' => 'appPricePoint', 'limit' => 3 })

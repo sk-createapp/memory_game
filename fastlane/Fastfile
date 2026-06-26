@@ -26,6 +26,29 @@ platform :ios do
     )
   end
 
+  desc "App Store Connect に全9言語のスクショをアップロード（バイナリ/メタデータは対象外・審査提出はしない）"
+  lane :upload_screenshots do
+    api_key = app_store_connect_api_key(
+      key_id: ENV["ASC_KEY_ID"],
+      issuer_id: ENV["ASC_ISSUER_ID"],
+      key_filepath: ENV["ASC_KEY_FILEPATH"]
+    )
+
+    deliver(
+      api_key: api_key,
+      app_identifier: "com.skcreation.memorygame",
+      skip_binary_upload: true,       # .ipa はアップロードしない
+      skip_metadata: true,            # テキストメタデータは別 lane(upload_metadata)
+      skip_screenshots: false,        # スクショをアップロードする
+      overwrite_screenshots: true,    # 既存スクショを全置換
+      screenshots_path: "fastlane/screenshots",
+      force: true,                    # HTMLプレビューを出さずに実行
+      run_precheck_before_submit: false,
+      submit_for_review: false,       # 保存のみ。提出は手動
+      automatic_release: false
+    )
+  end
+
   desc "アップロード前にメタデータの整合をチェック（precheck）"
   lane :check_metadata do
     api_key = app_store_connect_api_key(

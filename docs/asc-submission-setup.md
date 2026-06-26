@@ -33,8 +33,11 @@
 - 出典: [[legal-site-deploy]]（URL定義は `lib/constant/app_links.dart`）。
 
 ### 2. 年齢評価 / コンテンツ権利 / IDFA — fastlane API
-- **年齢評価 = 4+**（`appStoreAgeRating=FOUR_PLUS`）。年齢評価アンケートの全コンテンツ項目を `NONE`、
-  能力系ブール（advertising/ageAssurance/gambling/healthOrWellnessTopics/lootBox/messagingAndChat/parentalControls/unrestrictedWebAccess/userGeneratedContent）を全て `false` で確定。
+- **年齢評価 = 4+**（`appStoreAgeRating=FOUR_PLUS`）。年齢評価アンケートの全コンテンツ項目を `NONE` で確定。
+  能力系ブールは **`advertising=true`**（AdMob 広告を表示するため。Apple定義「アプリ内での商品/サービスの有料プロモーション＝バナー/動画/プレイアブル等」に該当。Advertising は 4+ カテゴリのため**評価は4+のまま上がらない**）、
+  それ以外（ageAssurance/gambling/healthOrWellnessTopics/lootBox/messagingAndChat/parentalControls/unrestrictedWebAccess/userGeneratedContent）は全て `false` で確定。
+  - `healthOrWellnessTopics=false` は妥当（脳トレ訴求はあるが、アプリ自体は「セルフケア/ライフスタイルの推奨」を提供しないため非該当）。
+  - **2026-06-26 修正**: 当初 `advertising=false` だったが広告表示の実態と矛盾するため `true` に訂正（読み取り専用検証は `fastlane/asc_state.rb`、本文と一致）。
 - **コンテンツ権利 = `DOES_NOT_USE_THIRD_PARTY_CONTENT`**（第三者コンテンツ非使用。広告は「コンテンツ」に当たらない）。
 - **IDFA**: ATT 未実装・`NSUserTrackingUsageDescription` なし → **IDFA 不使用**。よって IDFA アテステーション不要。
   AdMob は非パーソナライズ広告（IDFAトラッキングなし）。
@@ -92,6 +95,28 @@
 - コンプライアンス（デジタルサービス法、27地域）= 有効。
 
 → **サブスクを含む初版の提出ブロッカーにはならない**。
+
+### 8. 説明文への法務リンク追記 + カスタムEULA（2026-06-26 追加） — fastlane API
+Apple ガイドライン 3.1.2（自動更新サブスク）対応で、**説明文とEULAの双方**に利用規約/プライバシーポリシーへの動作するリンクを記載。
+- **各言語の説明文（概要）末尾**に、ロケール別ラベルで**利用規約＋プライバシーポリシー**のURLを追記（[fastlane/metadata/<locale>/description.txt](fastlane/metadata) が源泉。ASC にも反映済み）。
+  - リンク先ページは ja/en の2系統（非ja言語は en ページ）。ラベルのみ各言語化（例 de=Nutzungsbedingungen/Datenschutzerklärung, ko=이용약관/개인정보처리방침）。
+  - **日本語の説明文のみ「特定商取引法に基づく表記」URL も追記** → `https://skcreation-legal.pages.dev/tokushoho`（skcreation 共通の特商法ページ。IAP/サブスクにも適用）。
+- **カスタムEULA を新規作成**（従来は Apple 標準EULA）。[fastlane/metadata/eula.txt](fastlane/metadata/eula.txt) が源泉。**EN/JA 併記**で、利用規約・**プライバシーポリシー**（ユーザ要望）・（日本語側に）特商法のURL＋自動更新サブスクの定型文言を含む。**全175地域**に適用。
+- 確認URL（全て 200）: `…/memory-game/{ja,en}/{terms,privacy}` と `…/tokushoho`。
+
+| 対象 | 利用規約 | プライバシーポリシー | 特商法 |
+|---|---|---|---|
+| 日本語 説明文 / EULA(ja節) | `…/memory-game/ja/terms` | `…/memory-game/ja/privacy` | `…/tokushoho` |
+| その他8言語 説明文 / EULA(en節) | `…/memory-game/en/terms` | `…/memory-game/en/privacy` | — |
+
+### 9. 価格関連ワードの削除（2026-06-26） — fastlane API
+Apple は**メタデータ（キーワードを除く）に価格訴求語（"無料"/"Free" 等）があるとリジェクト**するため、該当箇所を削除/言い換え:
+- **全9言語の プロモーション用テキスト 末尾の価格訴求を削除**（ja「まずは無料で。」/ en「Free to start.」/ es「¡Gratis!」/ fr「Gratuit.」/ de「Jetzt kostenlos!」/ ru「Начните бесплатно!」/ ko「먼저 무료로 시작하세요.」/ zh「先免费试试！」/ hi「मुफ़्त शुरू करें!」）。
+- **en/hi の説明文の "Free Mode"/"फ्री मोड"**（＝時間無制限モードの意。価格ではないが誤検知回避）を価格中立に言い換え（「時間無制限で、自分のペースで」相当）。zh は元々 "自由模式" で価格語なし＝据え置き。
+- **カスタムEULA** の "free"/"無料" を「広告により運営」「サブスクなしで全機能利用可」に言い換え。
+  - ただし「料金は購入確定時に Apple ID に請求…」等の**自動更新サブスクの課金開示は Apple 必須のため保持**（これは価格訴求ではない）。
+- 検証: name / subtitle / promo / description / EULA すべて価格語なしを確認。
+- **キーワード（keywords）はユーザ指示により対象外**（非表示フィールドで Apple も価格語を許容。en/zh/ko/ja/fr に "free" 系が残るが意図的）。
 
 ## ⏳ 残件（提出前にこれだけ）
 

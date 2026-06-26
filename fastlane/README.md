@@ -23,6 +23,14 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 App Store Connect に全9言語のテキストメタデータをアップロード（バイナリ/スクショは対象外・審査提出はしない）
 
+### ios upload_screenshots
+
+```sh
+[bundle exec] fastlane ios upload_screenshots
+```
+
+App Store Connect に全9言語のスクショをアップロード（バイナリ/メタデータは対象外・審査提出はしない）
+
 ### ios check_metadata
 
 ```sh
