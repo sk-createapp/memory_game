@@ -213,19 +213,50 @@ def paste_device(canvas, dev, x, y):
     canvas.alpha_composite(sh)
     canvas.alpha_composite(dev.convert("RGBA"), (x, y))
 
+def _arrow_mask(center_x, cy):
+    """太い角丸矢印のシルエットマスクを返す。軸＋矢じり、各頂点を丸める。"""
+    m = Image.new("L", (CW, CH), 0)
+    d = ImageDraw.Draw(m)
+    # 軸（太い角丸長方形）
+    d.rounded_rectangle([center_x - 205, cy - 50, center_x + 60, cy + 50], radius=26, fill=255)
+    # 矢じり
+    head = [(center_x + 0, cy - 140), (center_x + 0, cy + 140), (center_x + 208, cy)]
+    d.polygon(head, fill=255)
+    # 頂点を丸める
+    for vx, vy in head:
+        d.ellipse([vx - 24, vy - 24, vx + 24, vy + 24], fill=255)
+    return m
+
 def half_arrow(canvas, center_x, cy):
-    """center_x を中心に水平の矢印を描く。画面外は自動でクリップされ、
-    右端(center_x=CW)では軸、左端(center_x=0)では矢じりが見える。"""
-    # 影
-    sh = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
-    sd = ImageDraw.Draw(sh)
-    sd.rounded_rectangle([center_x - 215, cy - 28 + 8, center_x + 55, cy + 28 + 8], radius=16, fill=(60, 45, 30, 80))
-    sd.polygon([(center_x + 30, cy - 92 + 8), (center_x + 30, cy + 92 + 8), (center_x + 215, cy + 8)], fill=(60, 45, 30, 80))
-    sh = sh.filter(ImageFilter.GaussianBlur(12))
-    canvas.alpha_composite(sh)
-    d = ImageDraw.Draw(canvas)
-    d.rounded_rectangle([center_x - 215, cy - 28, center_x + 55, cy + 28], radius=16, fill=ORANGE + (255,))
-    d.polygon([(center_x + 30, cy - 92), (center_x + 30, cy + 92), (center_x + 215, cy)], fill=ORANGE + (255,))
+    """center_x を中心に太い立体的な矢印を描く。画面外はクリップされ、
+    右端(center_x=CW)では軸、左端(center_x=0)では矢じりが見える。
+    隣接2枚を並べると1本の矢印に繋がる。"""
+    mask = _arrow_mask(center_x, cy)
+    # 縦グラデーション（上=明るい橙 / 下=濃い橙）で立体感
+    y0, y1 = cy - 165, cy + 165
+    top, bot = (240, 146, 96), (190, 84, 46)
+    grad = Image.new("RGBA", (CW, CH), (0, 0, 0, 0))
+    gd = ImageDraw.Draw(grad)
+    for yy in range(y0, y1 + 1):
+        t = (yy - y0) / (y1 - y0)
+        gd.line([(0, yy), (CW, yy)],
+                fill=(int(top[0] + (bot[0] - top[0]) * t),
+                      int(top[1] + (bot[1] - top[1]) * t),
+                      int(top[2] + (bot[2] - top[2]) * t), 255))
+    arrow = Image.new("RGBA", (CW, CH), (0, 0, 0, 0))
+    arrow.paste(grad, (0, 0), mask)
+    # ドロップシャドウ
+    shadow = Image.new("RGBA", (CW, CH), (0, 0, 0, 0))
+    shadow.paste(Image.new("RGBA", (CW, CH), (66, 42, 26, 150)), (0, 18), mask)
+    shadow = shadow.filter(ImageFilter.GaussianBlur(20))
+    # 上面のハイライト（艶）
+    hi = Image.new("RGBA", (CW, CH), (0, 0, 0, 0))
+    ImageDraw.Draw(hi).rounded_rectangle(
+        [center_x - 188, cy - 38, center_x + 150, cy - 6], radius=16, fill=(255, 255, 255, 70))
+    hi.putalpha(Image.composite(hi.getchannel("A"), Image.new("L", (CW, CH), 0), mask))
+    canvas.alpha_composite(shadow)
+    canvas.alpha_composite(arrow)
+    canvas.alpha_composite(hi)
 
 def make_step(lang, key, exit_right, enter_left):
     head_path, head_idx = FONTS[lang][0]
