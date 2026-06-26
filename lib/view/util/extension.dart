@@ -21,7 +21,13 @@ extension DispSize on BuildContext {
     return 20;
   }
 
-  double get contentMaxWidth => isTabletWidth ? 560 : 420;
+  // タブレットでは中央カラムの最大幅を画面幅に応じて段階的に広げ、
+  // iPad で左右の余白だけが大きく空く（横幅が一律で狭く見える）のを防ぐ。
+  // ただし広げすぎるとボタンや文字が間延びするため上限を設ける。
+  double get contentMaxWidth {
+    if (!isTabletWidth) return 420;
+    return (sizeWidth * 0.72).clamp(560.0, 760.0);
+  }
   double get contentWidth {
     return math.min(sizeWidth - pagePadding * 2, contentMaxWidth);
   }
@@ -59,7 +65,9 @@ extension DispSize on BuildContext {
     final availableWidth = math.min(contentWidth, constraints.maxWidth) *
         maxWidthRatio.clamp(0.0, 1.0);
     final availableHeight = constraints.maxHeight - topReserve - bottomReserve;
-    final maxTableSize = isTabletWidth ? 540.0 : 420.0;
+    // 盤面は正方形。タブレットでは横幅の拡大に合わせて上限も引き上げ、
+    // 広がったカラム幅と高さの許す範囲で盤面を大きく表示する。
+    final maxTableSize = isTabletWidth ? 640.0 : 420.0;
 
     return math
         .min(math.min(availableWidth, availableHeight), maxTableSize)
