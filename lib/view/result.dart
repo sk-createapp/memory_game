@@ -237,7 +237,16 @@ class _AnswerViewState extends ConsumerState<ResultView> {
                                   ),
                                   SizedBox(height: context.sectionGap),
                                   //バナー
-                                  const AdmobBannerWidget(),
+                                  //広告のロード状態（読込中／成功／失敗で畳む）に
+                                  //関わらず下端の確保高さを一定にして、上のボタンや
+                                  //コメントが広告の有無で上下にずれないよう固定する。
+                                  SizedBox(
+                                    height: context.bannerReserve,
+                                    child: const Align(
+                                      alignment: Alignment.bottomCenter,
+                                      child: AdmobBannerWidget(),
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),

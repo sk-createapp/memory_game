@@ -214,7 +214,16 @@ class _MemorizeViewState extends ConsumerState<MemorizeView> {
                         ),
                         SizedBox(height: context.sectionGap),
                         //バナー
-                        const AdmobBannerWidget(),
+                        //広告のロード状態（読込中／成功／失敗で畳む）に関わらず
+                        //下端の確保高さを一定にして、上の完了・隠すボタンが
+                        //広告の有無で上下にずれないように固定スロットへ収める。
+                        SizedBox(
+                          height: context.bannerReserve,
+                          child: const Align(
+                            alignment: Alignment.bottomCenter,
+                            child: AdmobBannerWidget(),
+                          ),
+                        ),
                       ],
                     ),
                   ),
