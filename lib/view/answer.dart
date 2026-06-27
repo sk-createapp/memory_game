@@ -310,6 +310,31 @@ class _AnswerViewState extends ConsumerState<AnswerView> {
               setState(() {});
             }
           },
+          //長押し
+          onLongPressed: () {
+            _selectedChoiceIndex = i;
+            if (_selectedAnswerItemIndex != null) {
+              //アイテムテーブル更新
+              ref.read(itemTableInfoProvider.notifier).answerItem(
+                  answerTableItemIndexes[_selectedAnswerItemIndex!],
+                  widget.iconChoices[i]);
+              //長押しした場合もフォーカスを次の回答アイテムに移動する。
+              //ただしダブルタップと違い、シートの高さは変えない。
+              _selectedAnswerItemIndex = (_selectedAnswerItemIndex! + 1) %
+                  answerTableItemIndexes.length;
+              _selectedChoiceIndex = itemTableInfo
+                          .tableItems[
+                              answerTableItemIndexes[_selectedAnswerItemIndex!]]
+                          .answeredIcon ==
+                      null
+                  ? null
+                  : widget.iconChoices.indexOf(itemTableInfo
+                      .tableItems[
+                          answerTableItemIndexes[_selectedAnswerItemIndex!]]
+                      .answeredIcon!);
+              setState(() {});
+            }
+          },
           child: Container(
             decoration: BoxDecoration(
               color: selected ? DefColor.orangeSoft : DefColor.darkBeige,

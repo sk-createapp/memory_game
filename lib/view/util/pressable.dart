@@ -160,6 +160,7 @@ class PressableTile extends StatefulWidget {
   final Widget child;
   final VoidCallback? onPressed;
   final VoidCallback? onDoublePressed;
+  final VoidCallback? onLongPressed;
   final BorderRadius borderRadius;
   final PressHaptic haptic;
 
@@ -168,6 +169,7 @@ class PressableTile extends StatefulWidget {
     required this.child,
     required this.onPressed,
     this.onDoublePressed,
+    this.onLongPressed,
     this.borderRadius = BorderRadius.zero,
     this.haptic = PressHaptic.light,
   });
@@ -212,6 +214,12 @@ class _PressableTileState extends State<PressableTile> {
           : () {
               firePressFeedback(widget.haptic);
               widget.onDoublePressed!.call();
+            },
+      onLongPress: widget.onLongPressed == null
+          ? null
+          : () {
+              firePressFeedback(widget.haptic);
+              widget.onLongPressed!.call();
             },
       child: AnimatedScale(
         scale: _pressed ? 0.9 : 1.0,
