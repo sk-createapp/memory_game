@@ -14,7 +14,7 @@
 | Apple ID | `6783421578` |
 | Bundle ID | `com.skcreation.memorygame` |
 | SKU | `memorygame` |
-| 主要言語 | 日本語 |
+| 主要言語（Primary Language） | **英語（en-US）** ← `ja` から変更。グローバルのフォールバック＆審査が円滑になるため。日本語ロケールは完全ローカライズ済みなので日本のリスティング表示は不変。 |
 | バージョン | 1.0（build `1` = `1.0.0`） |
 | バージョン状態 | `PREPARE_FOR_SUBMISSION`（リリース方法=手動 `MANUAL`） |
 
@@ -61,7 +61,8 @@
 ### 6. サブスクリプション — fastlane API + ブラウザ
 - グループ「Premium」に**サブスクグループ・ローカリゼーション**を追加（`ja`=「プレミアム」, `en-US`=「Premium」）。
   → これで「Monthly Premium」が `MISSING_METADATA` を解消し **`READY_TO_SUBMIT`** へ。
-- 商品 `premium_monthly`（自動更新・1ヶ月・¥200基準/175地域）。審査用スクショ=COMPLETE、ja表示名「プレミアム（広告なし）」。
+- 商品 `premium_monthly`（自動更新・1ヶ月・**全175地域を単一ティア10016に統一**）。審査用スクショ=COMPLETE、ja表示名「プレミアム（広告なし）」。
+  - **価格改定（2026-06-27）**: 当初は ¥200 基準だが海外が円換算で日本より2〜4割安かったため、海外アンカーを **US$1.49 相当（ティア10016）に底上げ**。同ティアで日本は **¥200 据え置き**、USA=$1.49 / GBP=£1.49 / EUR=€1.49 / KRW=₩1,200 等。155地域↑・日本据え置き・19地域（中国¥8→¥6 CNY 等、元設定が単一ティアでなかった分）↓。`subscriptionPrices` を地域ごとに `preserveCurrentPrice=false` で個別POST（`preserveCurrentPrice` は既存購読者の据え置き用で、地域カスケードはしないため一括設定は不可）。
 - **バージョン1.0 の「アプリ内購入とサブスクリプション」に Monthly Premium を添付済み**（アプリ初版と同時審査に載せる構成）。
 
 ### 7. App プライバシー（データ収集の栄養ラベル） — ブラウザ（ASC Web UI / 公開済み）
@@ -154,6 +155,8 @@ price = 0.0 (Free, 175地域)
 ageRating = FOUR_PLUS
 contentRights = DOES_NOT_USE_THIRD_PARTY_CONTENT
 subscription premium_monthly = READY_TO_SUBMIT（バージョンに添付済み）
+subscription price = 全175地域 ティア10016（JPN ¥200 / USA $1.49）※2026-06-27 改定
+appAvailability = 全175地域配信（除外なし。v2リソース未作成＝デフォルト全地域）
 App プライバシー = 公開済み（全データ「リンクされない/トラッキングなし」）
 privacyPolicyUrl / supportUrl = 全9ロケール設定済み
 審査連絡先 = 設定済み（サインイン不要）
