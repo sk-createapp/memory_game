@@ -537,7 +537,9 @@ class TableIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(4),
-      child: ShadowedImage(icon),
+      // ぼかし影のラスタライズ結果をレイヤーにキャッシュし、再コンポジット時の
+      // 再計算を防ぐ（タイル数ぶん効く）。
+      child: RepaintBoundary(child: ShadowedImage(icon)),
     );
   }
 }
@@ -557,14 +559,18 @@ class ShadowedImage extends StatelessWidget {
           offset: const Offset(0, 2),
           child: ImageFiltered(
             imageFilter: ui.ImageFilter.blur(sigmaX: 1.8, sigmaY: 1.8),
+            // 影はぼかすので低解像度デコードで十分。
             child: Image.asset(
               asset,
+              cacheWidth: 128,
               color: const Color(0x66000000),
               colorBlendMode: BlendMode.srcIn,
             ),
           ),
         ),
-        Image.asset(asset),
+        // 元画像は513pxだがタイル表示は小さいので、表示相当の解像度でデコード
+        // してメモリとデコード負荷を抑える。
+        Image.asset(asset, cacheWidth: 320),
       ],
     );
   }
